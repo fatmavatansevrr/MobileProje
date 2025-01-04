@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">MobileProje</string>
+    <string name="pick_a_username">Pick a username</string>
+    <string name="username">Username</string>
+    <string name="sushiroll22">sushiroll22</string>
+    <string name="continueText">Continue</string>
+    <string name="back">Back</string>
+    <string name="what_do_you_want_to_achieve">What do you want to achieve?</string>
+    <string name="we_ll_use_this_to_recommend_images_and_templates_especially_for_you">We’ll use this to recommend images and templates especially for you.</string>
+    <string name="goal">Goal</string>
+    <string name="todo">TODO</string>
+    <string name="swipe_right_if_you_like_left_if_you_don_t">Swipe right if you like, left if you don\'t.</string>
+    <string name="visionary">Visionary</string>
+    <string name="your_personal_goal_setting_app">Your Personal Goal-Setting App</string>
+    <string name="sign_in">Sign In</string>
 </resources>
