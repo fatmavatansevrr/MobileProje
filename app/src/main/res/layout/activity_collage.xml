@@ -1,53 +1,30 @@
-<RelativeLayout
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="0dp">
+    android:padding="16dp">
 
-    <!-- Collage ImageView -->
+    <!-- ImageView for displaying the collage -->
     <ImageView
         android:id="@+id/collage_image_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:scaleType="centerCrop"
-        android:contentDescription="Collage Image" />
-
-    <!-- Horizontal Button Layout -->
-    <LinearLayout
-        android:id="@+id/button_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center"
-        android:weightSum="2">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/save_to_library_button" />
 
     <!-- Save to Library Button -->
     <Button
         android:id="@+id/save_to_library_button"
         android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_weight="1"
-        android:layout_marginEnd="8dp"
-        android:backgroundTint="#56A7F6"
+        android:layout_height="wrap_content"
         android:text="Save to Library"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-medium" />
-
-    <!-- Edit Selection Button -->
-    <Button
-        android:id="@+id/edit_selection_button"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_weight="1"
-        android:layout_marginStart="8dp"
-        android:backgroundTint="#56A7F6"
-        android:text="Edit Selection"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-medium" />
-
-</LinearLayout>
-    </RelativeLayout>
+        app:layout_constraintTop_toBottomOf="@id/collage_image_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

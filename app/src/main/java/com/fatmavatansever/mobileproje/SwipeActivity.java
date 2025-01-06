@@ -1,6 +1,5 @@
 package com.fatmavatansever.mobileproje;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Base64;
@@ -14,15 +13,14 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.fatmavatansever.mobileproje.adapters.SwipeCardAdapter;
+import com.fatmavatansever.mobileproje.models.SwipeCard;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
 import com.yuyakaido.android.cardstackview.CardStackView;
 import com.yuyakaido.android.cardstackview.Direction;
 import com.yuyakaido.android.cardstackview.StackFrom;
 import com.yuyakaido.android.cardstackview.SwipeableMethod;
-
-import com.fatmavatansever.mobileproje.adapters.SwipeCardAdapter;
-import com.fatmavatansever.mobileproje.models.SwipeCard;
 
 import org.json.JSONArray;
 
@@ -43,25 +41,22 @@ public class SwipeActivity extends AppCompatActivity {
     private List<SwipeCard> allCards; // Cards loaded and shuffled
     private final Set<String> fetchedImageUrls = new HashSet<>(); // Track unique image URLs
     private String username;
+    private String visionBoardId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_swipe);
-
         cardStackView = findViewById(R.id.card_stack_view);
-
-        // Retrieve selected tags from Intent
         List<String> selectedTags = getIntent().getStringArrayListExtra("selectedTags");
-        username = getIntent().getStringExtra("username");
+        username = getIntent().getStringExtra("userId");
+        visionBoardId = getIntent().getStringExtra("visionBoardId");
 
         if (username == null || username.isEmpty()) {
             Toast.makeText(this, "Username not provided", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-
-        // Initialize lists
         selectedCards = new ArrayList<>();
         allCards = new ArrayList<>();
 
@@ -93,7 +88,7 @@ public class SwipeActivity extends AppCompatActivity {
     private class CardStackListener implements com.yuyakaido.android.cardstackview.CardStackListener {
         @Override
         public void onCardDragging(Direction direction, float ratio) {
-            // Handle dragging (optional logging or UI changes)
+            // Optional: Handle dragging (logging or UI changes)
         }
 
         @Override
@@ -109,7 +104,7 @@ public class SwipeActivity extends AppCompatActivity {
 
             // If last card swiped, navigate to CollageActivity
             if (cardStackLayoutManager.getTopPosition() == allCards.size()) {
-                saveLikedImagesToFirestore(username); // Save liked images before transitioning
+                saveLikedImagesToFirestore(); // Save liked images before transitioning
                 Intent intent = new Intent(SwipeActivity.this, CollageActivity.class);
                 intent.putExtra("selectedCards", (ArrayList<SwipeCard>) selectedCards);
                 startActivity(intent);
@@ -137,34 +132,28 @@ public class SwipeActivity extends AppCompatActivity {
             // Optional: Handle card disappearance
         }
     }
-    private void saveLikedImagesToFirestore(String username) {
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        List<String> imageUrls = new ArrayList<>();
 
+    private void saveLikedImagesToFirestore() {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+        List<Map<String, String>> likedImages = new ArrayList<>();
         for (SwipeCard card : selectedCards) {
-            imageUrls.add(card.getImageUrl());
+            Map<String, String> imageData = new HashMap<>();
+            imageData.put("url", card.getImageUrl());
+            imageData.put("tag", card.getTag());
+            Log.d("SwipeActivity", "Liked Card Added: " + card.getImageUrl() + " with tag: " + card.getTag());
+
+            likedImages.add(imageData);
         }
 
-        // Use update to add likedImages to the user's document
         firestore.collection("users")
-                .document(username) // Use the actual username to identify the document
-                .update("likedImages", imageUrls) // Update or create the likedImages field
+                .document(username)
+                .collection("visionBoards")
+                .document(visionBoardId)
+                .update("likedImages", likedImages)
                 .addOnSuccessListener(aVoid -> Log.d("SwipeActivity", "Liked images saved to Firestore"))
-                .addOnFailureListener(e -> {
-                    Log.e("SwipeActivity", "Error saving liked images: ", e);
-                    // If the document doesn't exist, create it
-                    Map<String, Object> likedImages = new HashMap<>();
-                    likedImages.put("likedImages", imageUrls);
-
-                    firestore.collection("users")
-                            .document(username)
-                            .set(likedImages)
-                            .addOnSuccessListener(aVoid1 -> Log.d("SwipeActivity", "Document created with liked images"))
-                            .addOnFailureListener(e1 -> Log.e("SwipeActivity", "Error creating document: ", e1));
-                });
+                .addOnFailureListener(e -> Log.e("SwipeActivity", "Error saving liked images: ", e));
     }
-
-
 
     private void fetchImagesForTags(List<String> tags) {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
@@ -190,21 +179,19 @@ public class SwipeActivity extends AppCompatActivity {
                         List<SwipeCard> fetchedCards = new ArrayList<>();
                         for (int i = 0; i < resources.length(); i++) {
                             String imageUrl = resources.getJSONObject(i).getString("secure_url");
+                            String imageTag = tag;
 
-                            // Add to the list only if the URL is not already fetched
                             if (!fetchedImageUrls.contains(imageUrl)) {
                                 fetchedImageUrls.add(imageUrl);
-                                fetchedCards.add(new SwipeCard(imageUrl));
+                                fetchedCards.add(new SwipeCard(imageUrl, imageTag));
                             }
                         }
 
-                        // Add fetched images to the main list and shuffle
+                        // Update UI with the fetched data
                         runOnUiThread(() -> {
                             allCards.addAll(fetchedCards);
                             Collections.shuffle(allCards); // Shuffle to ensure randomness
                             swipeCardAdapter.notifyDataSetChanged();
-
-                            // Fetch next page if available
                             if (!cursor.isEmpty()) {
                                 fetchImagesFromCloudinary(tag, cursor, requestQueue);
                             }

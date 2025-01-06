@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class PreferenceActivity extends AppCompatActivity {
 
@@ -33,9 +34,13 @@ public class PreferenceActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         firestore = FirebaseFirestore.getInstance();
-        username = getIntent().getStringExtra("username");
+        username = getIntent().getStringExtra("userId");
+        if (username == null || username.isEmpty()) {
+            Toast.makeText(this, "Error: User ID not found!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        // Set up RecyclerView
         goalsList = getGoals();
         goalAdapter = new GoalAdapter(goalsList);
         binding.goalsRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
@@ -69,7 +74,6 @@ public class PreferenceActivity extends AppCompatActivity {
         return goals;
     }
 
-    // Map combined goals to their components
     private List<String> mapSelectedGoals(List<String> selectedGoals) {
         List<String> mappedGoals = new ArrayList<>();
         for (String goal : selectedGoals) {
@@ -83,26 +87,32 @@ public class PreferenceActivity extends AppCompatActivity {
         return mappedGoals;
     }
 
-    // Save preferences to Firestore
-    public void savePreferences(List<String> preferences) {
-        Map<String, Object> userPreferences = new HashMap<>();
-        userPreferences.put("preferences", preferences);
+    // Save the Vision Board to Firestore
+    private void savePreferences(List<String> preferences) {
+        String visionBoardId = UUID.randomUUID().toString();
+
+        Map<String, Object> visionBoardData = new HashMap<>();
+        visionBoardData.put("preferences", preferences);
+        visionBoardData.put("likedImages", new ArrayList<>()); // Initialize empty liked images
 
         firestore.collection("users")
                 .document(username)
-                .set(userPreferences) // Use set() to create or update the document
+                .collection("visionBoards")
+                .document(visionBoardId)
+                .set(visionBoardData)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Preferences saved!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Vision Board saved successfully!", Toast.LENGTH_SHORT).show();
 
-                    // Pass selected goals as tags to SwipeActivity
+                    // Navigate to SwipeActivity to handle liked images
                     Intent intent = new Intent(PreferenceActivity.this, SwipeActivity.class);
+                    intent.putExtra("userId", username);
+                    intent.putExtra("visionBoardId", visionBoardId);
                     intent.putStringArrayListExtra("selectedTags", new ArrayList<>(preferences));
-                    intent.putExtra("username", username);
                     startActivity(intent);
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error saving Vision Board: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 }

@@ -3,8 +3,6 @@ package com.fatmavatansever.mobileproje;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.fatmavatansever.mobileproje.databinding.ActivityCollageBinding;
 import com.fatmavatansever.mobileproje.models.SwipeCard;
 
 import java.io.File;
@@ -21,6 +20,7 @@ import java.util.List;
 
 public class CollageActivity extends AppCompatActivity {
 
+    private ActivityCollageBinding binding;
     private List<Bitmap> imageBitmaps = new ArrayList<>();
     private Bitmap collageBitmap;
     private List<SwipeCard> selectedCards;
@@ -28,7 +28,10 @@ public class CollageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_collage);
+
+        // Inflate binding
+        binding = ActivityCollageBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         // Get the selected cards passed from SwipeActivity
         selectedCards = (List<SwipeCard>) getIntent().getSerializableExtra("selectedCards");
@@ -53,18 +56,8 @@ public class CollageActivity extends AppCompatActivity {
                     });
         }
 
-        // Set up Edit Selection button
-        /*Button editSelectionButton = findViewById(R.id.edit_selection_button);
-        editSelectionButton.setOnClickListener(v -> {
-            Intent intent = new Intent(CollageActivity.this, SwipeActivity.class);
-            intent.putExtra("selectedCards", (ArrayList<SwipeCard>) selectedCards);
-            startActivity(intent);
-            finish(); // Allow the user to go back and continue swiping
-        });*/
-
-        // Set up Save to Library button
-        Button saveToLibraryButton = findViewById(R.id.save_to_library_button);
-        saveToLibraryButton.setOnClickListener(v -> {
+        // Set up Save to Library button listener
+        binding.saveToLibraryButton.setOnClickListener(v -> {
             if (collageBitmap != null) {
                 saveCollageToLibrary(collageBitmap);
             } else {
@@ -79,9 +72,8 @@ public class CollageActivity extends AppCompatActivity {
 
         collageBitmap = CollageUtils.createDynamicCollage(imageBitmaps, collageWidth, collageHeight);
 
-        // Display collage
-        ImageView collageImageView = findViewById(R.id.collage_image_view);
-        collageImageView.setImageBitmap(collageBitmap);
+        // Display collage using binding
+        binding.collageImageView.setImageBitmap(collageBitmap);
     }
 
     private void saveCollageToLibrary(Bitmap collage) {
