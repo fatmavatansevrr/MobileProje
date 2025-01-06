@@ -53,8 +53,6 @@ public class SwipeActivity extends AppCompatActivity {
 
         // Retrieve selected tags from Intent
         List<String> selectedTags = getIntent().getStringArrayListExtra("selectedTags");
-        Log.d("SwipeActivity", "Received tags: " + selectedTags);
-
         username = getIntent().getStringExtra("username");
 
         if (username == null || username.isEmpty()) {

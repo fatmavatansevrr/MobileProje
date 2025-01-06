@@ -65,7 +65,7 @@ public class PreferenceActivity extends AppCompatActivity {
         goals.add(new Goal(R.drawable.heath, "Health"));
         goals.add(new Goal(R.drawable.travel, "Travel"));
         goals.add(new Goal(R.drawable.travel, "Education and Career")); // Single UI option
-        goals.add(new Goal(R.drawable.heath, "Relationships"));
+        goals.add(new Goal(R.drawable.heath, "Relationship"));
         return goals;
     }
 
@@ -97,6 +97,7 @@ public class PreferenceActivity extends AppCompatActivity {
                     // Pass selected goals as tags to SwipeActivity
                     Intent intent = new Intent(PreferenceActivity.this, SwipeActivity.class);
                     intent.putStringArrayListExtra("selectedTags", new ArrayList<>(preferences));
+                    intent.putExtra("username", username);
                     startActivity(intent);
                     finish();
                 })

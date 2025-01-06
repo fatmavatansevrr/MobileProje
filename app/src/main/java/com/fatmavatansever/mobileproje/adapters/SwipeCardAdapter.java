@@ -40,21 +40,17 @@ public class SwipeCardAdapter extends RecyclerView.Adapter<SwipeCardAdapter.Swip
                 .into(holder.imageView);
     }
 
-
-
     @Override
     public int getItemCount() {
         return swipeCardList.size();
     }
 
-    // Getter for swipeCardList
     public List<SwipeCard> getSwipeCardList() {
         return swipeCardList;
     }
 
     static class SwipeCardViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
-
         public SwipeCardViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.card_image);
