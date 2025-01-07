@@ -43,6 +43,8 @@ public class SwipeActivity extends AppCompatActivity {
     private String username;
     private String visionBoardId;
 
+    private static final int MAX_LIKED_CARDS = 15;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,19 +100,30 @@ public class SwipeActivity extends AppCompatActivity {
                 SwipeCard likedCard = swipeCardAdapter.getSwipeCardList().get(currentPosition);
                 selectedCards.add(likedCard);
                 Toast.makeText(SwipeActivity.this, "Liked", Toast.LENGTH_SHORT).show();
+
+                // Eğer 15 beğenilen karta ulaşıldıysa bir sonraki aktiviteye geç
+                if (selectedCards.size() >= MAX_LIKED_CARDS) {
+                    saveLikedImagesToFirestore(); // Firestore'a kaydet
+                    Intent intent = new Intent(SwipeActivity.this, CollageActivity.class);
+                    intent.putExtra("selectedCards", (ArrayList<SwipeCard>) selectedCards);
+                    startActivity(intent);
+                    finish();
+                    return; // Geçiş yaptıktan sonra metodu bitir
+                }
             } else if (direction == Direction.Left) {
                 Toast.makeText(SwipeActivity.this, "Disliked", Toast.LENGTH_SHORT).show();
             }
 
-            // If last card swiped, navigate to CollageActivity
+            // Eğer son karta ulaşıldıysa (15 beğenilmeden)
             if (cardStackLayoutManager.getTopPosition() == allCards.size()) {
-                saveLikedImagesToFirestore(); // Save liked images before transitioning
+                saveLikedImagesToFirestore(); // Firestore'a kaydet
                 Intent intent = new Intent(SwipeActivity.this, CollageActivity.class);
                 intent.putExtra("selectedCards", (ArrayList<SwipeCard>) selectedCards);
                 startActivity(intent);
                 finish();
             }
         }
+
 
         @Override
         public void onCardRewound() {

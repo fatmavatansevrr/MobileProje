@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1000771969380",
+    "project_id": "sckapkd",
+    "storage_bucket": "sckapkd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1000771969380:android:0561cd5888f975ef5dda71",
+        "android_client_info": {
+          "package_name": "com.fatmavatansever.mobileproje"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFVygi2fgknZ2_kP9UtFJdd7scIT4NRbk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
