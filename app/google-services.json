@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "391414257778",
+    "project_id": "mobilproje-5e44f",
+    "storage_bucket": "mobilproje-5e44f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:391414257778:android:bb7ce2c92e383848f6caeb",
+        "android_client_info": {
+          "package_name": "com.fatmavatansever.mobileproje"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwAxsqpyc_YQ8P9DBFe0lEVnTWs8iahXI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
