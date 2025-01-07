@@ -18,6 +18,8 @@ import com.bumptech.glide.request.transition.Transition;
 import com.fatmavatansever.mobileproje.databinding.ActivityCollageBinding;
 import com.fatmavatansever.mobileproje.models.SwipeCard;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +92,31 @@ public class CollageActivity extends AppCompatActivity {
 
         // Display collage in ImageView
         binding.collageImageView.setImageBitmap(collageBitmap);
+
+        saveImageToCreatedImages(collageBitmap);
+    }
+
+    private void saveImageToCreatedImages(Bitmap bitmap) {
+        try {
+            // Uygulama içi dosya dizininde 'createdImages' klasörü oluşturun
+            File createdImagesFolder = new File(getFilesDir(), "createdImages");
+            if (!createdImagesFolder.exists()) {
+                createdImagesFolder.mkdirs(); // Klasör yoksa oluştur
+            }
+
+            // Kolaj için benzersiz bir dosya oluştur
+            File collageFile = new File(createdImagesFolder, "collage_" + System.currentTimeMillis() + ".png");
+
+            // Bitmap'i dosyaya yaz
+            FileOutputStream fos = new FileOutputStream(collageFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+
+            Toast.makeText(this, "Collage saved to 'createdImages' folder!", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Error saving collage: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void saveImageToGallery(Bitmap bitmap) {
