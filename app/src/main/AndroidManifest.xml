@@ -17,6 +17,9 @@
         <activity android:name=".SwipeActivity" />
         <activity android:name=".CollageActivity" />
         <activity android:name=".WelcomeActivity"/>
+        <activity android:name=".HistoryActivity" />
+        <activity android:name=".VisionBoardDetailActivity" />
+
         <activity android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

@@ -4,10 +4,14 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
+<<<<<<< HEAD
         <DropdownSelection timestamp="2025-01-07T18:18:40.983860300Z">
+=======
+        <DropdownSelection timestamp="2025-01-06T17:30:49.367363500Z">
+>>>>>>> origin/Bilge-Branch-1
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\vatan\.android\avd\Copy_ofPixel_4_API_29.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\bilge\.android\avd\Pixel_4a_API_35.avd" />
             </handle>
           </Target>
         </DropdownSelection>

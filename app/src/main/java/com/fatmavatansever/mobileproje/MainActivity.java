@@ -42,7 +42,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.historyButton.setOnClickListener(v -> {
-            Toast.makeText(this, "History feature not implemented yet", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+            startActivity(intent);
         });
 
         binding.settingsButton.setOnClickListener(v -> {

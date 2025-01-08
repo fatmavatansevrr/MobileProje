@@ -1,13 +1,8 @@
 package com.fatmavatansever.mobileproje;
 
-import android.content.ContentValues;
+import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,7 +13,8 @@ import com.bumptech.glide.request.transition.Transition;
 import com.fatmavatansever.mobileproje.databinding.ActivityCollageBinding;
 import com.fatmavatansever.mobileproje.models.SwipeCard;
 
-import java.io.OutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +46,7 @@ public class CollageActivity extends AppCompatActivity {
                         public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
                             imageBitmaps.add(resource);
                             if (imageBitmaps.size() == selectedCards.size()) {
-                                createCollage();
+                                displayCollage();
                             }
                         }
 
@@ -60,61 +56,42 @@ public class CollageActivity extends AppCompatActivity {
                     });
         }
 
-        // Set up Save to Gallery button listener
+        // Set up Save to Library button listener
         binding.saveToLibraryButton.setOnClickListener(v -> {
             if (collageBitmap != null) {
-                saveImageToGallery(collageBitmap);
+                saveCollageToLibrary(collageBitmap);
             } else {
                 Toast.makeText(this, "Collage is not ready yet.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void createCollage() {
-        int width = 300;  // Each image width
-        int height = 300; // Each image height
-        int columns = 3;  // Number of columns in the collage
-        int rows = (int) Math.ceil((double) imageBitmaps.size() / columns);
+    private void displayCollage() {
+        int collageWidth = 1080; // Screen width or desired width
+        int collageHeight = 1920; // Screen height or desired height
 
-        // Create a blank bitmap for the collage
-        collageBitmap = Bitmap.createBitmap(columns * width, rows * height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(collageBitmap);
+        collageBitmap = CollageUtils.createDynamicCollage(imageBitmaps, collageWidth, collageHeight);
 
-        for (int i = 0; i < imageBitmaps.size(); i++) {
-            Bitmap scaledImage = Bitmap.createScaledBitmap(imageBitmaps.get(i), width, height, false);
-
-            int row = i / columns;
-            int col = i % columns;
-            canvas.drawBitmap(scaledImage, col * width, row * height, null);
-        }
-
-        // Display collage in ImageView
+        // Display collage using binding
         binding.collageImageView.setImageBitmap(collageBitmap);
     }
 
-    private void saveImageToGallery(Bitmap bitmap) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.Images.Media.TITLE, "Collage");
-        contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Collage created in app");
-        contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Collages");
-        }
-
-        Uri imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-
-        if (imageUri != null) {
-            try (OutputStream outputStream = getContentResolver().openOutputStream(imageUri)) {
-                if (outputStream != null) {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                    Toast.makeText(this, "Collage saved to gallery!", Toast.LENGTH_SHORT).show();
-                }
-            } catch (Exception e) {
-                Toast.makeText(this, "Error saving collage: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+    private void saveCollageToLibrary(Bitmap collage) {
+        try {
+            File storageDir = getExternalFilesDir(null); // App's private storage directory
+            if (storageDir != null && !storageDir.exists()) {
+                storageDir.mkdirs();
             }
-        } else {
-            Toast.makeText(this, "Failed to save collage.", Toast.LENGTH_SHORT).show();
+            File collageFile = new File(storageDir, "collage_" + System.currentTimeMillis() + ".png");
+
+            FileOutputStream fos = new FileOutputStream(collageFile);
+            collage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+
+            Toast.makeText(this, "Collage saved to library!", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Failed to save collage: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 }
