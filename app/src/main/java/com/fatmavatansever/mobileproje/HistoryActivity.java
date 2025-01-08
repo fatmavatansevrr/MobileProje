@@ -37,6 +37,23 @@ public class HistoryActivity extends AppCompatActivity {
 
         // createdImages klasöründen dosyaları yükle
         loadVisionBoards();
+
+
+
+        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.bottom_home) {
+                // Navigate to MainActivity
+                startActivity(new Intent(this, MainActivity.class));
+                return true;
+            } else if (item.getItemId() == R.id.history_menu) {
+                // Navigate to HistoryActivity
+                //startActivity(new Intent(this, HistoryActivity.class));
+                return true;
+            } else {
+                return false;
+            }
+        });
+
     }
 
     private void loadVisionBoards() {

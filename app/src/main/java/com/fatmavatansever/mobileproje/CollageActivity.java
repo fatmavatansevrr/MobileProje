@@ -1,6 +1,7 @@
 package com.fatmavatansever.mobileproje;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
@@ -34,7 +35,6 @@ public class CollageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Inflate binding
         binding = ActivityCollageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -67,6 +67,22 @@ public class CollageActivity extends AppCompatActivity {
                 saveImageToGallery(collageBitmap);
             } else {
                 Toast.makeText(this, "Collage is not ready yet.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+
+        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.bottom_home) {
+                // Navigate to MainActivity
+                startActivity(new Intent(this, MainActivity.class));
+                return true;
+            } else if (item.getItemId() == R.id.history_menu) {
+                // Navigate to HistoryActivity
+                startActivity(new Intent(this, HistoryActivity.class));
+                return true;
+            } else {
+                return false;
             }
         });
     }

@@ -7,8 +7,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.fatmavatansever.mobileproje.databinding.ActivityMainSwipeBinding;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -33,7 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class SwipeActivity extends AppCompatActivity {
-
+    private ActivityMainSwipeBinding binding;
     private CardStackView cardStackView;
     private CardStackLayoutManager cardStackLayoutManager;
     private SwipeCardAdapter swipeCardAdapter;
@@ -48,8 +50,9 @@ public class SwipeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_swipe);
-        cardStackView = findViewById(R.id.card_stack_view);
+        binding = ActivityMainSwipeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
         List<String> selectedTags = getIntent().getStringArrayListExtra("selectedTags");
         username = getIntent().getStringExtra("userId");
         visionBoardId = getIntent().getStringExtra("visionBoardId");
@@ -72,11 +75,11 @@ public class SwipeActivity extends AppCompatActivity {
         cardStackLayoutManager.setMaxDegree(20.0f);
         cardStackLayoutManager.setSwipeableMethod(SwipeableMethod.Manual);
 
-        cardStackView.setLayoutManager(cardStackLayoutManager);
+        binding.cardStackView.setLayoutManager(cardStackLayoutManager);
 
         // Set up adapter with empty list
         swipeCardAdapter = new SwipeCardAdapter(allCards);
-        cardStackView.setAdapter(swipeCardAdapter);
+        binding.cardStackView.setAdapter(swipeCardAdapter);
 
         // Fetch images based on tags
         if (selectedTags != null && !selectedTags.isEmpty()) {
@@ -85,8 +88,42 @@ public class SwipeActivity extends AppCompatActivity {
             Log.e("SwipeActivity", "No tags received");
             Toast.makeText(this, "No tags selected.", Toast.LENGTH_SHORT).show();
         }
+
+        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.bottom_home) {
+                showNavigationConfirmationDialog(MainActivity.class);
+                return true;
+            } else if (item.getItemId() == R.id.history_menu) {
+                showNavigationConfirmationDialog(HistoryActivity.class);
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+
+
     }
 
+    //for alert confirmation for leaving the page
+    private void showNavigationConfirmationDialog(Class<?> destinationActivity) {
+        // Show confirmation dialog
+        new AlertDialog.Builder(this)
+                .setTitle("Confirm Navigation")
+                .setMessage("Your vision board creation progress will be lost. Are you sure you want to navigate away?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    // Navigate to the destination activity
+                    startActivity(new Intent(this, destinationActivity));
+                })
+                .setNegativeButton("No", (dialog, which) -> {
+                    // Dismiss the dialog
+                    dialog.dismiss();
+                })
+                .show();
+    }
+
+
+    //for swipe cards
     private class CardStackListener implements com.yuyakaido.android.cardstackview.CardStackListener {
         @Override
         public void onCardDragging(Direction direction, float ratio) {

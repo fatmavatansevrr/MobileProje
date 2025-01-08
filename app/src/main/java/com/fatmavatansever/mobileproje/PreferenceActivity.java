@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.fatmavatansever.mobileproje.adapters.GoalAdapter;
 import com.fatmavatansever.mobileproje.databinding.ActivityPreferencesBinding;
 import com.fatmavatansever.mobileproje.models.Goal;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -35,6 +36,8 @@ public class PreferenceActivity extends AppCompatActivity {
 
         firestore = FirebaseFirestore.getInstance();
         username = getIntent().getStringExtra("userId");
+        String visionBoardId = getIntent().getStringExtra("visionBoardId");
+
         if (username == null || username.isEmpty()) {
             Toast.makeText(this, "Error: User ID not found!", Toast.LENGTH_SHORT).show();
             finish();
@@ -58,10 +61,28 @@ public class PreferenceActivity extends AppCompatActivity {
                     System.out.println("Mapped Goal: " + goal); // For debugging
                 }
 
-                savePreferences(mappedGoals);
+                savePreferences(mappedGoals, visionBoardId);
             }
         });
+
+        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.bottom_home) {
+                // Navigate to MainActivity
+                startActivity(new Intent(this, MainActivity.class));
+                return true;
+            } else if (item.getItemId() == R.id.history_menu) {
+                // Navigate to HistoryActivity
+                startActivity(new Intent(this, HistoryActivity.class));
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+
     }
+
+
 
     // Dummy goals data
     @NonNull
@@ -88,8 +109,8 @@ public class PreferenceActivity extends AppCompatActivity {
     }
 
     // Save the Vision Board to Firestore
-    private void savePreferences(List<String> preferences) {
-        String visionBoardId = UUID.randomUUID().toString();
+    private void savePreferences(List<String> preferences, String visionBoardId) {
+        //String visionBoardId = UUID.randomUUID().toString();
 
         Map<String, Object> visionBoardData = new HashMap<>();
         visionBoardData.put("preferences", preferences);
