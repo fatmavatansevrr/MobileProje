@@ -20,4 +20,5 @@
     <string name="visionboard_detail_image">VisionBoard Detail Image</string>
     <string name="finish_and_save">Finish and Save</string>
     <string name="home">Home</string>
+    <string name="download_image">Download Image</string>
 </resources>
