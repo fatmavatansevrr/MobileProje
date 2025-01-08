@@ -1,5 +1,6 @@
 package com.fatmavatansever.mobileproje;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.fatmavatansever.mobileproje.databinding.ActivityVisionBoardDetailBinding;
 
+import java.io.File;
 import java.io.OutputStream;
 
 public class VisionBoardDetailActivity extends AppCompatActivity {
@@ -31,6 +33,7 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
         // Intent'ten görsel yolunu al
         String visionBoardPath = getIntent().getStringExtra("visionBoardPath");
 
+
         if (visionBoardPath != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(visionBoardPath);
             binding.visionboardDetailImage.setImageBitmap(bitmap);
@@ -38,6 +41,8 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
             // İndirme butonu tıklama olayı
             binding.downloadButton.setOnClickListener(v -> saveImageToGallery(bitmap));
         }
+
+
 
 
         // Bottom Navigation tıklama olaylarını ayarla

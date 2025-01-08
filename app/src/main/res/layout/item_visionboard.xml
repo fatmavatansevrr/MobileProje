@@ -17,22 +17,34 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop" />
 
+        <!-- Silme Butonu -->
+        <ImageButton
+            android:id="@+id/delete_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@id/download_button"
+            android:layout_margin="8dp"
+            android:background="@drawable/rounded_background"
+            android:contentDescription="@string/delete_image"
+            android:padding="8dp"
+            android:src="@drawable/ic_delete"
+            android:scaleType="centerInside" />
+
         <!-- İndirme Butonu -->
         <ImageButton
             android:id="@+id/download_button"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginStart="4dp"
-            android:layout_marginLeft="4dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="4dp"
-            android:layout_marginRight="4dp"
-            android:layout_marginBottom="4dp"
+            android:layout_margin="8dp"
             android:background="@drawable/rounded_background"
             android:contentDescription="@string/download_image"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_download" />
+            android:src="@drawable/ic_download"
+            android:scaleType="centerInside" />
+
+
+
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

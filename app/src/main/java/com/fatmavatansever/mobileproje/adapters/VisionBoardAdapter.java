@@ -1,5 +1,6 @@
 package com.fatmavatansever.mobileproje.adapters;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -74,6 +76,9 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
         Bitmap bitmap = BitmapFactory.decodeFile(visionBoard.getCollageFile().getAbsolutePath());
         holder.visionBoardImageView.setImageBitmap(bitmap);
 
+
+
+
         // İndirme butonuna tıklama
         holder.downloadButton.setOnClickListener(v -> {
             saveImageToGallery(holder.itemView.getContext(), bitmap);
@@ -81,6 +86,27 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
 
         // Tıklama olayını ayarla
         holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(visionBoard));
+
+        // Silme butonu tıklama olayı
+        holder.deleteButton.setOnClickListener(v -> {
+            new AlertDialog.Builder(holder.itemView.getContext())
+                    .setTitle("Are you sure you want to delete this?")
+                    .setMessage("You are about to delete this VisionBoard. This action cannot be undone.")
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        // VisionBoard'u sil
+                        boolean deleted = visionBoard.getCollageFile().delete();
+                        if (deleted) {
+                            visionBoards.remove(position);
+                            notifyItemRemoved(position);
+                            notifyItemRangeChanged(position, visionBoards.size());
+                            Toast.makeText(holder.itemView.getContext(), "VisionBoard deleted!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(holder.itemView.getContext(), "Could not be deleted!", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .show();
+        });
     }
 
     @Override
@@ -91,11 +117,15 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
     static class VisionBoardViewHolder extends RecyclerView.ViewHolder {
         ImageView visionBoardImageView;
         ImageButton downloadButton; // Buton referansı
+        ImageButton deleteButton;
+
 
         public VisionBoardViewHolder(@NonNull View itemView) {
             super(itemView);
             visionBoardImageView = itemView.findViewById(R.id.visionboard_image);
-            downloadButton = itemView.findViewById(R.id.download_button); // Buton bağlandı
+            downloadButton = itemView.findViewById(R.id.download_button); // indirme Buton bağlandı
+            deleteButton = itemView.findViewById(R.id.delete_button); // Silme butonu
+
         }
     }
 

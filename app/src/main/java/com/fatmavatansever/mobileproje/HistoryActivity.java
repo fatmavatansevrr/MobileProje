@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -12,7 +13,9 @@ import com.fatmavatansever.mobileproje.databinding.ActivityHistoryBinding;
 import com.fatmavatansever.mobileproje.models.VisionBoard;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class HistoryActivity extends AppCompatActivity {
@@ -20,6 +23,8 @@ public class HistoryActivity extends AppCompatActivity {
     private ActivityHistoryBinding binding;
     private List<VisionBoard> visionBoardList;
     private VisionBoardAdapter adapter;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +70,7 @@ public class HistoryActivity extends AppCompatActivity {
             if (files != null && files.length > 0) {
                 for (File file : files) {
                     if (file.isFile() && file.getName().endsWith(".png")) {
+
                         visionBoardList.add(new VisionBoard(file));
                     }
                 }
@@ -82,5 +88,7 @@ public class HistoryActivity extends AppCompatActivity {
         Intent intent = new Intent(this, VisionBoardDetailActivity.class);
         intent.putExtra("visionBoardPath", visionBoard.getCollageFile().getAbsolutePath());
         startActivity(intent);
+
     }
+
 }

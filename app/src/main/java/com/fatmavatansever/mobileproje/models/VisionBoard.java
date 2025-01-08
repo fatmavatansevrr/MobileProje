@@ -7,9 +7,11 @@ public class VisionBoard {
 
     public VisionBoard(File collageFile) {
         this.collageFile = collageFile;
+
     }
 
     public File getCollageFile() {
         return collageFile;
     }
+
 }
