@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+        <ImageView
+            android:id="@+id/visionboard_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <!-- Silme Butonu -->
+        <ImageButton
+            android:id="@+id/delete_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@id/download_button"
+            android:layout_margin="8dp"
+            android:background="@drawable/rounded_background"
+            android:contentDescription="@string/delete_image"
+            android:padding="8dp"
+            android:src="@drawable/ic_delete"
+            android:scaleType="centerInside" />
+
+        <!-- İndirme Butonu -->
+        <ImageButton
+            android:id="@+id/download_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="8dp"
+            android:background="@drawable/rounded_background"
+            android:contentDescription="@string/download_image"
+            android:src="@drawable/ic_download"
+            android:scaleType="centerInside" />
+
+
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

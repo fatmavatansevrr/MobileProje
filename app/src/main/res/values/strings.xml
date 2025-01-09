@@ -16,4 +16,10 @@
     <string name="log_in">Log In</string>
     <string name="history">History</string>
     <string name="create_visionboard">Create Visionboard</string>
+    <string name="save_to_library">Save to Library</string>
+    <string name="visionboard_detail_image">VisionBoard Detail Image</string>
+    <string name="finish_and_save">Finish and Save</string>
+    <string name="home">Home</string>
+    <string name="download_image">Download Image</string>
+    <string name="delete_image">Delete Image</string>
 </resources>
