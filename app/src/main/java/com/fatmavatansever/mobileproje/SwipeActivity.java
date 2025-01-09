@@ -2,20 +2,17 @@ package com.fatmavatansever.mobileproje;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.fatmavatansever.mobileproje.databinding.ActivityMainSwipeBinding;
 import com.fatmavatansever.mobileproje.adapters.SwipeCardAdapter;
 import com.fatmavatansever.mobileproje.models.SwipeCard;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -37,24 +34,20 @@ import java.util.Set;
 
 public class SwipeActivity extends AppCompatActivity {
 
-    private ActivityMainSwipeBinding binding;
     private CardStackView cardStackView;
     private CardStackLayoutManager cardStackLayoutManager;
     private SwipeCardAdapter swipeCardAdapter;
     private List<SwipeCard> selectedCards;
-    private List<SwipeCard> allCards;
-    private final Set<String> fetchedImageUrls = new HashSet<>();
+    private List<SwipeCard> allCards; // Cards loaded and shuffled
+    private final Set<String> fetchedImageUrls = new HashSet<>(); // Track unique image URLs
     private String username;
     private String visionBoardId;
-
-    private static final int MAX_LIKED_CARDS = 15;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityMainSwipeBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
+        setContentView(R.layout.activity_main_swipe);
+        cardStackView = findViewById(R.id.card_stack_view);
         List<String> selectedTags = getIntent().getStringArrayListExtra("selectedTags");
         username = getIntent().getStringExtra("userId");
         visionBoardId = getIntent().getStringExtra("visionBoardId");
@@ -64,35 +57,10 @@ public class SwipeActivity extends AppCompatActivity {
             finish();
             return;
         }
-
         selectedCards = new ArrayList<>();
         allCards = new ArrayList<>();
-        setupCardStackView();
 
-        if (savedInstanceState != null) {
-            restoreSavedInstanceState(savedInstanceState);
-        } else {
-            if (selectedTags != null && !selectedTags.isEmpty()) {
-                fetchImagesForTags(selectedTags);
-            } else {
-                Log.e("SwipeActivity", "No tags received");
-                Toast.makeText(this, "No tags selected.", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.bottom_home) {
-                showNavigationConfirmationDialog(MainActivity.class);
-                return true;
-            } else if (item.getItemId() == R.id.history_menu) {
-                showNavigationConfirmationDialog(HistoryActivity.class);
-                return true;
-            }
-            return false;
-        });
-    }
-
-    private void setupCardStackView() {
+        // Set up CardStackLayoutManager
         cardStackLayoutManager = new CardStackLayoutManager(this, new CardStackListener());
         cardStackLayoutManager.setStackFrom(StackFrom.Top);
         cardStackLayoutManager.setVisibleCount(3);
@@ -102,94 +70,79 @@ public class SwipeActivity extends AppCompatActivity {
         cardStackLayoutManager.setMaxDegree(20.0f);
         cardStackLayoutManager.setSwipeableMethod(SwipeableMethod.Manual);
 
-        cardStackView = binding.cardStackView;
         cardStackView.setLayoutManager(cardStackLayoutManager);
+
+        // Set up adapter with empty list
         swipeCardAdapter = new SwipeCardAdapter(allCards);
         cardStackView.setAdapter(swipeCardAdapter);
-    }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList("selectedCards", (ArrayList<? extends Parcelable>) selectedCards);
-        outState.putParcelableArrayList("allCards", (ArrayList<? extends Parcelable>) allCards);
-        outState.putInt("currentPosition", cardStackLayoutManager.getTopPosition());
-    }
-
-    private void restoreSavedInstanceState(Bundle savedInstanceState) {
-        selectedCards = savedInstanceState.getParcelableArrayList("selectedCards");
-        allCards = savedInstanceState.getParcelableArrayList("allCards");
-
-        if (allCards != null) {
-            swipeCardAdapter = new SwipeCardAdapter(allCards);
-            cardStackView.setAdapter(swipeCardAdapter);
+        // Fetch images based on tags
+        if (selectedTags != null && !selectedTags.isEmpty()) {
+            fetchImagesForTags(selectedTags);
+        } else {
+            Log.e("SwipeActivity", "No tags received");
+            Toast.makeText(this, "No tags selected.", Toast.LENGTH_SHORT).show();
         }
-
-        int currentPosition = savedInstanceState.getInt("currentPosition", 0);
-        cardStackLayoutManager.scrollToPosition(currentPosition);
-    }
-
-    private void showNavigationConfirmationDialog(Class<?> destinationActivity) {
-        new AlertDialog.Builder(this)
-                .setTitle("Confirm Navigation")
-                .setMessage("Your vision board creation progress will be lost. Are you sure you want to navigate away?")
-                .setPositiveButton("Yes", (dialog, which) -> startActivity(new Intent(this, destinationActivity)))
-                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
-                .show();
     }
 
     private class CardStackListener implements com.yuyakaido.android.cardstackview.CardStackListener {
         @Override
-        public void onCardDragging(Direction direction, float ratio) {}
+        public void onCardDragging(Direction direction, float ratio) {
+            // Optional: Handle dragging (logging or UI changes)
+        }
 
         @Override
         public void onCardSwiped(Direction direction) {
-            int currentPosition = cardStackLayoutManager.getTopPosition() - 1;
-
             if (direction == Direction.Right) {
+                int currentPosition = cardStackLayoutManager.getTopPosition() - 1;
                 SwipeCard likedCard = swipeCardAdapter.getSwipeCardList().get(currentPosition);
                 selectedCards.add(likedCard);
                 Toast.makeText(SwipeActivity.this, "Liked", Toast.LENGTH_SHORT).show();
-
-                if (selectedCards.size() >= MAX_LIKED_CARDS) {
-                    saveLikedImagesToFirestore();
-                    navigateToCollageActivity();
-                }
             } else if (direction == Direction.Left) {
                 Toast.makeText(SwipeActivity.this, "Disliked", Toast.LENGTH_SHORT).show();
             }
 
+            // If last card swiped, navigate to CollageActivity
             if (cardStackLayoutManager.getTopPosition() == allCards.size()) {
-                saveLikedImagesToFirestore();
-                navigateToCollageActivity();
+                saveLikedImagesToFirestore(); // Save liked images before transitioning
+                Intent intent = new Intent(SwipeActivity.this, CollageActivity.class);
+                intent.putExtra("selectedCards", (ArrayList<SwipeCard>) selectedCards);
+                startActivity(intent);
+                finish();
             }
         }
 
         @Override
-        public void onCardRewound() {}
-        @Override
-        public void onCardCanceled() {}
-        @Override
-        public void onCardAppeared(View view, int position) {}
-        @Override
-        public void onCardDisappeared(View view, int position) {}
-    }
+        public void onCardRewound() {
+            // Optional: Handle card rewind
+        }
 
-    private void navigateToCollageActivity() {
-        Intent intent = new Intent(SwipeActivity.this, CollageActivity.class);
-        intent.putParcelableArrayListExtra("selectedCards", (ArrayList<SwipeCard>) selectedCards);
-        startActivity(intent);
-        finish();
+        @Override
+        public void onCardCanceled() {
+            // Optional: Handle swipe cancellation
+        }
+
+        @Override
+        public void onCardAppeared(View view, int position) {
+            // Optional: Handle card appearance
+        }
+
+        @Override
+        public void onCardDisappeared(View view, int position) {
+            // Optional: Handle card disappearance
+        }
     }
 
     private void saveLikedImagesToFirestore() {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        List<Map<String, String>> likedImages = new ArrayList<>();
 
+        List<Map<String, String>> likedImages = new ArrayList<>();
         for (SwipeCard card : selectedCards) {
             Map<String, String> imageData = new HashMap<>();
             imageData.put("url", card.getImageUrl());
             imageData.put("tag", card.getTag());
+            Log.d("SwipeActivity", "Liked Card Added: " + card.getImageUrl() + " with tag: " + card.getTag());
+
             likedImages.add(imageData);
         }
 
@@ -206,7 +159,7 @@ public class SwipeActivity extends AppCompatActivity {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
         for (String tag : tags) {
-            fetchImagesFromCloudinary(tag, null, requestQueue);
+            fetchImagesFromCloudinary(tag, null, requestQueue); // Initial request with no cursor
         }
     }
 
@@ -234,9 +187,10 @@ public class SwipeActivity extends AppCompatActivity {
                             }
                         }
 
+                        // Update UI with the fetched data
                         runOnUiThread(() -> {
                             allCards.addAll(fetchedCards);
-                            Collections.shuffle(allCards);
+                            Collections.shuffle(allCards); // Shuffle to ensure randomness
                             swipeCardAdapter.notifyDataSetChanged();
                             if (!cursor.isEmpty()) {
                                 fetchImagesFromCloudinary(tag, cursor, requestQueue);
