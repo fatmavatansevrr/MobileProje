@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -38,6 +37,7 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
         this.visionBoards = visionBoards;
         this.onItemClickListener = onItemClickListener;
     }
+
     private void saveImageToGallery(Context context, Bitmap bitmap) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Images.Media.TITLE, "VisionBoard");
@@ -60,7 +60,6 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
         }
     }
 
-
     @NonNull
     @Override
     public VisionBoardViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -75,9 +74,6 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
         // Kolaj dosyasını bitmap olarak yükle
         Bitmap bitmap = BitmapFactory.decodeFile(visionBoard.getCollageFile().getAbsolutePath());
         holder.visionBoardImageView.setImageBitmap(bitmap);
-
-
-
 
         // İndirme butonuna tıklama
         holder.downloadButton.setOnClickListener(v -> {
@@ -119,14 +115,11 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
         ImageButton downloadButton; // Buton referansı
         ImageButton deleteButton;
 
-
         public VisionBoardViewHolder(@NonNull View itemView) {
             super(itemView);
             visionBoardImageView = itemView.findViewById(R.id.visionboard_image);
             downloadButton = itemView.findViewById(R.id.download_button); // indirme Buton bağlandı
             deleteButton = itemView.findViewById(R.id.delete_button); // Silme butonu
-
         }
     }
-
 }

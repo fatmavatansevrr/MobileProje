@@ -20,10 +20,11 @@ import java.util.List;
 public class GoalAdapter extends RecyclerView.Adapter<GoalAdapter.GoalViewHolder> {
 
     private final List<Goal> goalList;
-    private final List<String> selectedGoals = new ArrayList<>();
+    private final List<String> selectedGoals;
 
-    public GoalAdapter(List<Goal> goalList) {
+    public GoalAdapter(List<Goal> goalList, List<String> selectedGoals) {
         this.goalList = goalList;
+        this.selectedGoals = selectedGoals != null ? selectedGoals : new ArrayList<>();
     }
 
     @NonNull

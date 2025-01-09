@@ -1,10 +1,12 @@
 package com.fatmavatansever.mobileproje;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fatmavatansever.mobileproje.databinding.ActivitySignupBinding;
@@ -17,6 +19,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private ActivitySignupBinding binding;
     private FirebaseFirestore firestore;
+    private String username; // Store the username for state management
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,14 +28,20 @@ public class SignInActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
         firestore = FirebaseFirestore.getInstance();
+
+        if (savedInstanceState != null) {
+            username = savedInstanceState.getString("username", "");
+            binding.usernameEditText.setText(username); // Restore the username in EditText
+        }
     }
 
     public void signInClicked(View view) {
-        String username = binding.usernameEditText.getText().toString().trim();
+        username = binding.usernameEditText.getText().toString().trim(); // Update the username variable
         if (username.isEmpty()) {
             Toast.makeText(this, "Please enter a username", Toast.LENGTH_LONG).show();
             return;
         }
+
         firestore.collection("users")
                 .whereEqualTo("username", username)
                 .get()
@@ -70,4 +79,18 @@ public class SignInActivity extends AppCompatActivity {
                 });
     }
 
+    // Save instance state to preserve the username
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("username", username); // Save the username
+    }
+
+    // Restore instance state for username
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        username = savedInstanceState.getString("username", "");
+        binding.usernameEditText.setText(username); // Restore the username in EditText
+    }
 }

@@ -11,16 +11,18 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fatmavatansever.mobileproje.databinding.ActivityVisionBoardDetailBinding;
 
-import java.io.File;
 import java.io.OutputStream;
 
 public class VisionBoardDetailActivity extends AppCompatActivity {
 
     private ActivityVisionBoardDetailBinding binding;
+    private Bitmap visionBoardBitmap; // Görseli saklamak için
+    private String visionBoardPath;  // Görsel yolunu saklamak için
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,20 +32,24 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
         binding = ActivityVisionBoardDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Intent'ten görsel yolunu al
-        String visionBoardPath = getIntent().getStringExtra("visionBoardPath");
-
-
-        if (visionBoardPath != null) {
-            Bitmap bitmap = BitmapFactory.decodeFile(visionBoardPath);
-            binding.visionboardDetailImage.setImageBitmap(bitmap);
-
-            // İndirme butonu tıklama olayı
-            binding.downloadButton.setOnClickListener(v -> saveImageToGallery(bitmap));
+        if (savedInstanceState != null) {
+            // Daha önceki durumu geri yükle
+            visionBoardPath = savedInstanceState.getString("visionBoardPath");
+            visionBoardBitmap = savedInstanceState.getParcelable("visionBoardBitmap");
+        } else {
+            // Intent'ten görsel yolunu al
+            visionBoardPath = getIntent().getStringExtra("visionBoardPath");
+            if (visionBoardPath != null) {
+                visionBoardBitmap = BitmapFactory.decodeFile(visionBoardPath);
+            }
         }
 
+        if (visionBoardBitmap != null) {
+            binding.visionboardDetailImage.setImageBitmap(visionBoardBitmap);
 
-
+            // İndirme butonu tıklama olayı
+            binding.downloadButton.setOnClickListener(v -> saveImageToGallery(visionBoardBitmap));
+        }
 
         // Bottom Navigation tıklama olaylarını ayarla
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -60,6 +66,7 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
             }
         });
     }
+
     private void saveImageToGallery(Bitmap bitmap) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Images.Media.TITLE, "VisionBoard");
@@ -80,5 +87,13 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
                 Toast.makeText(this, "Error saving image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    // Durum kaydetme
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("visionBoardPath", visionBoardPath); // Görsel yolunu kaydet
+        outState.putParcelable("visionBoardBitmap", visionBoardBitmap); // Bitmap'i kaydet
     }
 }

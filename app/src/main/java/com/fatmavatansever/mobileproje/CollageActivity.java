@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -38,27 +39,31 @@ public class CollageActivity extends AppCompatActivity {
         binding = ActivityCollageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Get the selected cards passed from SwipeActivity
-        selectedCards = (List<SwipeCard>) getIntent().getSerializableExtra("selectedCards");
+        if (savedInstanceState != null) {
+            restoreSavedInstanceState(savedInstanceState);
+        } else {
+            // Get the selected cards passed from SwipeActivity
+            selectedCards = (List<SwipeCard>) getIntent().getSerializableExtra("selectedCards");
 
-        // Load images into Bitmap list
-        for (SwipeCard card : selectedCards) {
-            Glide.with(this)
-                    .asBitmap()
-                    .load(card.getImageUrl())
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                            imageBitmaps.add(resource);
-                            if (imageBitmaps.size() == selectedCards.size()) {
-                                createCollage();
+            // Load images into Bitmap list
+            for (SwipeCard card : selectedCards) {
+                Glide.with(this)
+                        .asBitmap()
+                        .load(card.getImageUrl())
+                        .into(new CustomTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                                imageBitmaps.add(resource);
+                                if (imageBitmaps.size() == selectedCards.size()) {
+                                    createCollage();
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onLoadCleared(android.graphics.drawable.Drawable placeholder) {
-                        }
-                    });
+                            @Override
+                            public void onLoadCleared(android.graphics.drawable.Drawable placeholder) {
+                            }
+                        });
+            }
         }
 
         // Set up Save to Gallery button listener
@@ -70,15 +75,11 @@ public class CollageActivity extends AppCompatActivity {
             }
         });
 
-
-
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.bottom_home) {
-                // Navigate to MainActivity
                 startActivity(new Intent(this, MainActivity.class));
                 return true;
             } else if (item.getItemId() == R.id.history_menu) {
-                // Navigate to HistoryActivity
                 startActivity(new Intent(this, HistoryActivity.class));
                 return true;
             } else {
@@ -113,16 +114,13 @@ public class CollageActivity extends AppCompatActivity {
 
     private void saveImageToCreatedImages(Bitmap bitmap) {
         try {
-            // Create 'createdImages' folder in the app's internal storage
             File createdImagesFolder = new File(getFilesDir(), "createdImages");
             if (!createdImagesFolder.exists()) {
                 createdImagesFolder.mkdirs();
             }
 
-            // Create a unique file for the collage
             File collageFile = new File(createdImagesFolder, "collage_" + System.currentTimeMillis() + ".png");
 
-            // Write the bitmap to the file
             FileOutputStream fos = new FileOutputStream(collageFile);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
@@ -157,6 +155,23 @@ public class CollageActivity extends AppCompatActivity {
             }
         } else {
             Toast.makeText(this, "Failed to save collage.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Save instance state to preserve collageBitmap and selected cards
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("collageBitmap", collageBitmap);
+        outState.putSerializable("selectedCards", (ArrayList<SwipeCard>) selectedCards);
+    }
+
+    private void restoreSavedInstanceState(Bundle savedInstanceState) {
+        collageBitmap = savedInstanceState.getParcelable("collageBitmap");
+        selectedCards = (List<SwipeCard>) savedInstanceState.getSerializable("selectedCards");
+
+        if (collageBitmap != null) {
+            binding.collageImageView.setImageBitmap(collageBitmap);
         }
     }
 }

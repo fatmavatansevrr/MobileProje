@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -13,9 +13,7 @@ import com.fatmavatansever.mobileproje.databinding.ActivityHistoryBinding;
 import com.fatmavatansever.mobileproje.models.VisionBoard;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class HistoryActivity extends AppCompatActivity {
@@ -23,8 +21,7 @@ public class HistoryActivity extends AppCompatActivity {
     private ActivityHistoryBinding binding;
     private List<VisionBoard> visionBoardList;
     private VisionBoardAdapter adapter;
-
-
+    private int recyclerViewPosition = 0; // Track the scroll position of RecyclerView
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +37,12 @@ public class HistoryActivity extends AppCompatActivity {
         binding.visionboardRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.visionboardRecyclerView.setAdapter(adapter);
 
-        // createdImages klasöründen dosyaları yükle
-        loadVisionBoards();
-
-
+        if (savedInstanceState != null) {
+            restoreSavedInstanceState(savedInstanceState);
+        } else {
+            // createdImages klasöründen dosyaları yükle
+            loadVisionBoards();
+        }
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.bottom_home) {
@@ -51,14 +50,12 @@ public class HistoryActivity extends AppCompatActivity {
                 startActivity(new Intent(this, MainActivity.class));
                 return true;
             } else if (item.getItemId() == R.id.history_menu) {
-                // Navigate to HistoryActivity
-                //startActivity(new Intent(this, HistoryActivity.class));
+                // Stay on HistoryActivity
                 return true;
             } else {
                 return false;
             }
         });
-
     }
 
     private void loadVisionBoards() {
@@ -70,11 +67,9 @@ public class HistoryActivity extends AppCompatActivity {
             if (files != null && files.length > 0) {
                 for (File file : files) {
                     if (file.isFile() && file.getName().endsWith(".png")) {
-
                         visionBoardList.add(new VisionBoard(file));
                     }
                 }
-
                 adapter.notifyDataSetChanged();
             } else {
                 Toast.makeText(this, "No vision boards found!", Toast.LENGTH_SHORT).show();
@@ -88,7 +83,34 @@ public class HistoryActivity extends AppCompatActivity {
         Intent intent = new Intent(this, VisionBoardDetailActivity.class);
         intent.putExtra("visionBoardPath", visionBoard.getCollageFile().getAbsolutePath());
         startActivity(intent);
-
     }
 
+    // Save instance state to preserve RecyclerView scroll position and VisionBoard list
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Save the RecyclerView position
+        recyclerViewPosition = ((LinearLayoutManager) binding.visionboardRecyclerView.getLayoutManager())
+                .findFirstVisibleItemPosition();
+        outState.putInt("recyclerViewPosition", recyclerViewPosition);
+
+        // Save the VisionBoard list
+        outState.putSerializable("visionBoardList", (ArrayList<VisionBoard>) visionBoardList);
+    }
+
+    private void restoreSavedInstanceState(Bundle savedInstanceState) {
+        // Restore the VisionBoard list
+        visionBoardList = (List<VisionBoard>) savedInstanceState.getSerializable("visionBoardList");
+        if (visionBoardList == null) {
+            visionBoardList = new ArrayList<>();
+        }
+
+        adapter = new VisionBoardAdapter(visionBoardList, this::onVisionBoardClick);
+        binding.visionboardRecyclerView.setAdapter(adapter);
+
+        // Restore the RecyclerView position
+        recyclerViewPosition = savedInstanceState.getInt("recyclerViewPosition", 0);
+        binding.visionboardRecyclerView.scrollToPosition(recyclerViewPosition);
+    }
 }

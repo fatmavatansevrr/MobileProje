@@ -2,12 +2,10 @@ package com.fatmavatansever.mobileproje;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import androidx.appcompat.app.ActionBar;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fatmavatansever.mobileproje.databinding.ActivityMainBinding;
@@ -15,7 +13,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String SHARED_PREFS_NAME = "VisionBoardAppPrefs";
     private static final String USER_ID_KEY = "userId";
     private String userId; // Store user ID
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,25 +31,34 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the binding
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         // Initialize Firestore
         firestore = FirebaseFirestore.getInstance();
 
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
 
-        // Set up "Create VisionBoard" button listener
-        userId = getOrCreateUserId();
+        if (savedInstanceState != null) {
+            // Restore userId from savedInstanceState
+            userId = savedInstanceState.getString("userId");
+        } else {
+            // Get or create a new user ID
+            userId = getOrCreateUserId();
+        }
 
+        // Set up "Create VisionBoard" button listener
         binding.createButton.setOnClickListener(v -> {
             String visionBoardId = UUID.randomUUID().toString();
             navigateToPreferences(userId, visionBoardId);
         });
 
+        // Set up "History" button listener
         binding.historyButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
             startActivity(intent);
         });
 
+        // Set up "Settings" button listener
         binding.settingsButton.setOnClickListener(v -> {
             Toast.makeText(this, "Settings feature not implemented yet", Toast.LENGTH_SHORT).show();
         });
@@ -88,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
                 .set(userData)
                 .addOnSuccessListener(aVoid -> Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(this, "Error creating user: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
     }
 
     /**
@@ -103,6 +109,19 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    // Save instance state to preserve the userId
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("userId", userId); // Save userId
+    }
+
+    // Restore instance state for userId
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        userId = savedInstanceState.getString("userId"); // Restore userId
+    }
 
     /**
      * Create a user in Firestore and navigate to PreferenceActivity
