@@ -60,6 +60,27 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
         }
     }
 
+    private void deleteImage(Context context, int position) {
+        VisionBoard visionBoard = visionBoards.get(position);
+
+        new AlertDialog.Builder(context)
+                .setTitle("Are you sure you want to delete this?")
+                .setMessage("You are about to delete this VisionBoard. This action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    boolean deleted = visionBoard.getCollageFile().delete();
+                    if (deleted) {
+                        visionBoards.remove(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, visionBoards.size());
+                        Toast.makeText(context, "VisionBoard deleted!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(context, "Could not be deleted!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
 
     @NonNull
     @Override
@@ -84,29 +105,15 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
             saveImageToGallery(holder.itemView.getContext(), bitmap);
         });
 
+        // Silme butonu
+        holder.deleteButton.setOnClickListener(v -> deleteImage(holder.itemView.getContext(), position));
+
         // Tıklama olayını ayarla
         holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(visionBoard));
 
         // Silme butonu tıklama olayı
-        holder.deleteButton.setOnClickListener(v -> {
-            new AlertDialog.Builder(holder.itemView.getContext())
-                    .setTitle("Are you sure you want to delete this?")
-                    .setMessage("You are about to delete this VisionBoard. This action cannot be undone.")
-                    .setPositiveButton("Delete", (dialog, which) -> {
-                        // VisionBoard'u sil
-                        boolean deleted = visionBoard.getCollageFile().delete();
-                        if (deleted) {
-                            visionBoards.remove(position);
-                            notifyItemRemoved(position);
-                            notifyItemRangeChanged(position, visionBoards.size());
-                            Toast.makeText(holder.itemView.getContext(), "VisionBoard deleted!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(holder.itemView.getContext(), "Could not be deleted!", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                    .show();
-        });
+
+
     }
 
     @Override
