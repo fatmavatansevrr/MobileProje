@@ -20,107 +20,110 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ActivityMainBinding binding; // View Binding for MainActivity
-    private FirebaseFirestore firestore; // Firestore instance
-    private SharedPreferences sharedPreferences; // SharedPreferences instance
-    private static final String SHARED_PREFS_NAME = "VisionBoardAppPrefs";
-    private static final String USER_ID_KEY = "userId";
-    private String userId; // Store user ID
+    private ActivityMainBinding binding; // MainActivity için View Binding
+    private FirebaseFirestore firestore; // Firestore örneği
+    private SharedPreferences sharedPreferences; // SharedPreferences örneği
+    private static final String SHARED_PREFS_NAME = "VisionBoardAppPrefs"; // SharedPreferences adı
+    private static final String USER_ID_KEY = "userId"; // Kullanıcı ID anahtarı
+    private String userId; // Kullanıcı ID'sini saklamak için değişken
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Inflate the binding
+        // Binding'i şişir (inflate)
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        // Initialize Firestore
+
+        // Firestore'u başlat
         firestore = FirebaseFirestore.getInstance();
 
-        // Initialize SharedPreferences
+        // SharedPreferences'ı başlat
         sharedPreferences = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
 
-        // Set up "Create VisionBoard" button listener
-        userId = getOrCreateUserId();
+        // "VisionBoard Oluştur" butonuna tıklama olayını ayarla
+        userId = getOrCreateUserId(); // Kullanıcı ID'sini al veya oluştur
 
+        // VisionBoard oluşturma butonuna tıklama işlemi
         binding.createButton.setOnClickListener(v -> {
-            String visionBoardId = UUID.randomUUID().toString();
-            navigateToPreferences(userId, visionBoardId);
+            String visionBoardId = UUID.randomUUID().toString(); // Yeni bir VisionBoard ID'si oluştur
+            navigateToPreferences(userId, visionBoardId); // PreferenceActivity'ye geçiş yap
         });
 
+        // Geçmiş (History) butonuna tıklama işlemi
         binding.historyButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+            Intent intent = new Intent(MainActivity.this, HistoryActivity.class); // Geçmiş sayfasına geçiş
             startActivity(intent);
         });
     }
 
+    // Kullanıcı ID'si almak veya oluşturmak için kullanılan metot
     private String getOrCreateUserId() {
-        // Check if a user ID already exists in SharedPreferences
+        // SharedPreferences'ta bir kullanıcı ID'si olup olmadığını kontrol et
         String existingUserId = sharedPreferences.getString(USER_ID_KEY, null);
 
         if (existingUserId == null) {
-            // Generate a new user ID and save it to SharedPreferences
+            // Kullanıcı ID'si yoksa, yeni bir ID oluştur ve SharedPreferences'a kaydet
             String newUserId = UUID.randomUUID().toString();
             sharedPreferences.edit().putString(USER_ID_KEY, newUserId).apply();
 
-            // Create the user in Firestore
+            // Firestore'da kullanıcıyı oluştur
             createUserInFirestore(newUserId);
-            return newUserId;
+            return newUserId; // Yeni oluşturulan ID'yi döndür
         } else {
-            return existingUserId;
+            return existingUserId; // Mevcut kullanıcı ID'sini döndür
         }
     }
 
     /**
-     * Create a user in Firestore.
+     * Firestore'da bir kullanıcı oluşturur.
      *
-     * @param userId The unique user ID for the device.
+     * @param userId Cihaz için benzersiz kullanıcı ID'si.
      */
     private void createUserInFirestore(String userId) {
         Map<String, Object> userData = new HashMap<>();
-        userData.put("userId", userId);
+        userData.put("userId", userId); // Kullanıcı ID'sini veritabanına kaydet
 
-        firestore.collection("users")
-                .document(userId)
+        firestore.collection("users") // "users" koleksiyonuna veri ekle
+                .document(userId) // Kullanıcıyı benzersiz ID ile tanımla
                 .set(userData)
-                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(this, "Error creating user: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
+                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Hoşgeldiniz!", Toast.LENGTH_SHORT).show()) // Başarı mesajı
+                .addOnFailureListener(e -> Toast.makeText(this, "Kullanıcı oluşturulurken hata: " + e.getMessage(), Toast.LENGTH_SHORT).show()); // Hata mesajı
     }
 
     /**
-     * Navigate to the PreferenceActivity.
+     * Kullanıcıyı PreferenceActivity'ye yönlendirir.
      *
-     * @param userId The user ID to pass to the next activity.
+     * @param userId Gelecek activity'ye gönderilecek kullanıcı ID'si.
      */
     private void navigateToPreferences(String userId, String visionBoardId) {
-        Intent intent = new Intent(MainActivity.this, PreferenceActivity.class);
-        intent.putExtra("userId", userId);
-        intent.putExtra("visionBoardId", visionBoardId);
-        startActivity(intent);
+        Intent intent = new Intent(MainActivity.this, PreferenceActivity.class); // PreferenceActivity'ye geçiş
+        intent.putExtra("userId", userId); // Kullanıcı ID'sini intent ile gönder
+        intent.putExtra("visionBoardId", visionBoardId); // VisionBoard ID'sini intent ile gönder
+        startActivity(intent); // Activity'yi başlat
     }
 
-
     /**
-     * Create a user in Firestore and navigate to PreferenceActivity
+     * Firestore'da bir kullanıcı oluşturur ve PreferenceActivity'ye yönlendirir.
      *
-     * @param userId The unique user ID for the device
+     * @param userId Cihaz için benzersiz kullanıcı ID'si.
      */
     /*private void createUserAndNavigate(String userId) {
         Map<String, Object> userData = new HashMap<>();
         userData.put("userId", userId);
         userData.put("createdAt", System.currentTimeMillis());
         firestore.collection("users")
-                .document(userId) // User document ID is the unique user ID
+                .document(userId) // Kullanıcı belgesi ID'si, benzersiz kullanıcı ID'si ile
                 .set(userData)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "User created successfully!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Kullanıcı başarıyla oluşturuldu!", Toast.LENGTH_SHORT).show();
 
                     Intent intent = new Intent(MainActivity.this, PreferenceActivity.class);
                     intent.putExtra("userId", userId);
                     startActivity(intent);
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error creating user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Kullanıcı oluşturulurken hata: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }*/
 }

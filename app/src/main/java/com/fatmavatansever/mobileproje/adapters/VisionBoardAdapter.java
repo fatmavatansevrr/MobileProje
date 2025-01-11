@@ -29,93 +29,79 @@ import java.util.List;
 
 public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.VisionBoardViewHolder> {
 
-    private final List<VisionBoard> visionBoards;
-    private final OnItemClickListener onItemClickListener;
+    private final List<VisionBoard> visionBoards; // VisionBoard'ların listesi
+    private final OnItemClickListener onItemClickListener; // Tıklama olaylarını dinleyecek arayüz
 
+    // VisionBoard'a tıklandığında çalışacak metodun imzası
     public interface OnItemClickListener {
-        void onItemClick(VisionBoard visionBoard);
+        void onItemClick(VisionBoard visionBoard); // Tıklanan VisionBoard nesnesi gönderilecek
     }
 
+    // Constructor (Yapıcı metod)
     public VisionBoardAdapter(List<VisionBoard> visionBoards, OnItemClickListener onItemClickListener) {
         this.visionBoards = visionBoards;
         this.onItemClickListener = onItemClickListener;
     }
-    /*private void saveImageToGallery(Context context, Bitmap bitmap) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.Images.Media.TITLE, "VisionBoard");
-        contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Downloaded from app");
-        contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/VisionBoards");
-        }
-
-        Uri uri = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-
-        if (uri != null) {
-            try (OutputStream outputStream = context.getContentResolver().openOutputStream(uri)) {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                Toast.makeText(context, "Image saved to gallery!", Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                Toast.makeText(context, "Error saving image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        }
-    }*/
+    // Görseli galerinin içine kaydetme fonksiyonu
     private void saveImageToGallery(Context context, String filePath) {
         try {
-            // Bitmap'i dosya yolundan oluştur
+            // Dosya yolundan Bitmap oluştur
             Bitmap bitmap = BitmapFactory.decodeFile(filePath);
 
             ContentValues contentValues = new ContentValues();
-            contentValues.put(MediaStore.Images.Media.TITLE, "VisionBoard");
-            contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Downloaded from app");
-            contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+            contentValues.put(MediaStore.Images.Media.TITLE, "VisionBoard"); // Başlık
+            contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Downloaded from app"); // Açıklama
+            contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/png"); // MIME tipi
 
+            // Android 10 ve sonrasında özel bir yol gereklidir
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/VisionBoards");
             }
 
+            // Görseli kaydetmek için URI oluştur
             Uri uri = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
 
             if (uri != null) {
                 try (OutputStream outputStream = context.getContentResolver().openOutputStream(uri)) {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                    Toast.makeText(context, "Image saved to gallery!", Toast.LENGTH_SHORT).show();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream); // Görseli sıkıştırarak kaydet
+                    Toast.makeText(context, "Image saved to gallery!", Toast.LENGTH_SHORT).show(); // Başarı mesajı
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(context, "Error saving image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Error saving image: " + e.getMessage(), Toast.LENGTH_SHORT).show(); // Hata mesajı
         }
     }
 
-
+    // Görseli silme fonksiyonu
     private void deleteImage(Context context, int position) {
         VisionBoard visionBoard = visionBoards.get(position);
 
+        // Silme işlemi için bir uyarı dialogu oluştur
         new AlertDialog.Builder(context)
-                .setTitle("Are you sure you want to delete this?")
-                .setMessage("You are about to delete this VisionBoard. This action cannot be undone.")
+                .setTitle("Are you sure you want to delete this?") // Başlık
+                .setMessage("You are about to delete this VisionBoard. This action cannot be undone.") // Mesaj
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    boolean deleted = visionBoard.getCollageFile().delete();
+                    boolean deleted = visionBoard.getCollageFile().delete(); // Görseli sil
                     if (deleted) {
-                        visionBoards.remove(position);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, visionBoards.size());
+                        visionBoards.remove(position); // Listeyi güncelle
+                        notifyItemRemoved(position); // Elemanı listeden çıkar
+                        notifyItemRangeChanged(position, visionBoards.size()); // Diğer elemanları güncelle
                     } else {
-                        Toast.makeText(context, "Could not be deleted!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Could not be deleted!", Toast.LENGTH_SHORT).show(); // Silinemedi mesajı
                     }
                 })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                .show();
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()) // İptal tuşu
+                .show(); // Dialogu göster
     }
-
 
     @NonNull
     @Override
     public VisionBoardViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Layout'u şişir
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_visionboard, parent, false);
-        return new VisionBoardViewHolder(view);
+        return new VisionBoardViewHolder(view); // ViewHolder'ı döndür
     }
 
     @Override
@@ -124,54 +110,45 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
 
         // Glide ile görseli yükle
         Glide.with(holder.itemView.getContext())
-                .load(visionBoard.getCollageFile())
-                .override(200, 200) // İstenilen boyutta yükle
-                .into(holder.visionBoardImageView);
-        /*
-        // Kolaj dosyasını bitmap olarak yükle
-        Bitmap bitmap = BitmapFactory.decodeFile(visionBoard.getCollageFile().getAbsolutePath());
-        holder.visionBoardImageView.setImageBitmap(bitmap);
-*/
+                .load(visionBoard.getCollageFile()) // VisionBoard dosyasının URL'sini yükle
+                .override(200, 200) // Görselin boyutunu ayarla
+                .into(holder.visionBoardImageView); // ImageView'a yerleştir
 
-
-
-        // İndirme butonuna tıklama
+        // İndirme butonuna tıklandığında kaydetme işlemi yap
         holder.downloadButton.setOnClickListener(v -> {
             saveImageToGallery(holder.itemView.getContext(), visionBoard.getCollageFile().getAbsolutePath());
         });
 
-        // Silme butonu
+        // Silme butonuna tıklandığında görseli sil
         holder.deleteButton.setOnClickListener(v -> deleteImage(holder.itemView.getContext(), position));
 
-        // Tıklama olayını ayarla
+        // Tıklama olayını tetikle
         holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(visionBoard));
 
+        // Eğer tıklanan HistoryActivity ise, ona yönlendir
         holder.itemView.setOnClickListener(v -> {
             if (holder.itemView.getContext() instanceof HistoryActivity) {
                 ((HistoryActivity) holder.itemView.getContext()).onVisionBoardClick(visionBoard);
             }
         });
-
-
     }
 
     @Override
     public int getItemCount() {
-        return visionBoards.size();
+        return visionBoards.size(); // Liste boyutunu döndür
     }
 
+    // ViewHolder sınıfı, RecyclerView elemanlarını tutar
     static class VisionBoardViewHolder extends RecyclerView.ViewHolder {
-        ImageView visionBoardImageView;
-        ImageButton downloadButton; // Buton referansı
-        ImageButton deleteButton;
-
+        ImageView visionBoardImageView; // Görseli gösterecek ImageView
+        ImageButton downloadButton; // İndirme butonunun referansı
+        ImageButton deleteButton; // Silme butonunun referansı
 
         public VisionBoardViewHolder(@NonNull View itemView) {
             super(itemView);
-            visionBoardImageView = itemView.findViewById(R.id.visionboard_image);
-            downloadButton = itemView.findViewById(R.id.download_button); // indirme Buton bağlandı
-            deleteButton = itemView.findViewById(R.id.delete_button); // Silme butonu
-
+            visionBoardImageView = itemView.findViewById(R.id.visionboard_image); // ImageView'u bağla
+            downloadButton = itemView.findViewById(R.id.download_button); // İndirme butonunu bağla
+            deleteButton = itemView.findViewById(R.id.delete_button); // Silme butonunu bağla
         }
     }
 
