@@ -38,27 +38,38 @@ public class CollageActivity extends AppCompatActivity {
         binding = ActivityCollageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Get the selected cards passed from SwipeActivity
-        selectedCards = (List<SwipeCard>) getIntent().getSerializableExtra("selectedCards");
+        if (savedInstanceState != null) {
+            // Restore saved state
+            selectedCards = (List<SwipeCard>) savedInstanceState.getSerializable("selectedCards");
+            collageBitmap = savedInstanceState.getParcelable("collageBitmap");
 
-        // Load images into Bitmap list
-        for (SwipeCard card : selectedCards) {
-            Glide.with(this)
-                    .asBitmap()
-                    .load(card.getImageUrl())
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                            imageBitmaps.add(resource);
-                            if (imageBitmaps.size() == selectedCards.size()) {
-                                createCollage();
+            // Display restored collage
+            if (collageBitmap != null) {
+                binding.collageImageView.setImageBitmap(collageBitmap);
+            }
+        } else {
+            // Get the selected cards passed from SwipeActivity
+            selectedCards = (List<SwipeCard>) getIntent().getSerializableExtra("selectedCards");
+
+            // Load images into Bitmap list
+            for (SwipeCard card : selectedCards) {
+                Glide.with(this)
+                        .asBitmap()
+                        .load(card.getImageUrl())
+                        .into(new CustomTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                                imageBitmaps.add(resource);
+                                if (imageBitmaps.size() == selectedCards.size()) {
+                                    createCollage();
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onLoadCleared(android.graphics.drawable.Drawable placeholder) {
-                        }
-                    });
+                            @Override
+                            public void onLoadCleared(android.graphics.drawable.Drawable placeholder) {
+                            }
+                        });
+            }
         }
 
         // Set up Save to Gallery button listener
@@ -69,8 +80,6 @@ public class CollageActivity extends AppCompatActivity {
                 Toast.makeText(this, "Collage is not ready yet.", Toast.LENGTH_SHORT).show();
             }
         });
-
-
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.bottom_home) {
@@ -85,6 +94,17 @@ public class CollageActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Save selected cards
+        outState.putSerializable("selectedCards", new ArrayList<>(selectedCards));
+
+        // Save the generated collage bitmap
+        outState.putParcelable("collageBitmap", collageBitmap);
     }
 
     private void createCollage() {

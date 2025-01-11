@@ -14,10 +14,21 @@
         tools:targetApi="31">
         <activity android:name=".SignInActivity"/>
         <activity android:name=".PreferenceActivity" />
-        <activity android:name=".SwipeActivity" />
-        <activity android:name=".CollageActivity" />
-        <activity android:name=".WelcomeActivity"/>
-        <activity android:name=".HistoryActivity" />
+        <!-- SwipeActivity -->
+        <activity
+            android:name=".SwipeActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <!-- CollageActivity -->
+        <activity
+            android:name=".CollageActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <!-- WelcomeActivity -->
+        <activity android:name=".WelcomeActivity" />
+        <!-- HistoryActivity -->
+        <activity
+            android:name=".HistoryActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <!-- VisionBoardDetailActivity -->
         <activity android:name=".VisionBoardDetailActivity" />
 
         <activity android:name=".MainActivity"

@@ -37,9 +37,20 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
         String visionBoardPath = getIntent().getStringExtra("visionBoardPath");
         File visionBoardFile = new File(visionBoardPath);
 
+        if (visionBoardPath == null || visionBoardPath.isEmpty()) {
+            Toast.makeText(this, "Invalid vision board path!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        if (visionBoardPath != null) {
-            Bitmap bitmap = BitmapFactory.decodeFile(visionBoardPath);
+        if (!visionBoardFile.exists()) {
+            Toast.makeText(this, "Vision board file not found!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        Bitmap bitmap = BitmapFactory.decodeFile(visionBoardPath);
+        if (bitmap != null) {
             binding.visionboardDetailImage.setImageBitmap(bitmap);
 
             // İndirme butonu tıklama olayı
@@ -47,6 +58,10 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
             // Buton referansı
             ImageButton wallpaperButton = findViewById(R.id.set_wallpaper_button);
             wallpaperButton.setOnClickListener(v -> setVisionBoardAsWallpaper(bitmap));
+        }else {
+            Toast.makeText(this, "Failed to load vision board!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
         }
 
 
