@@ -11,18 +11,16 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.fatmavatansever.mobileproje.adapters.GoalAdapter;
 import com.fatmavatansever.mobileproje.databinding.ActivityPreferencesBinding;
 import com.fatmavatansever.mobileproje.models.Goal;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class PreferenceActivity extends AppCompatActivity {
 
-    private ActivityPreferencesBinding binding; // Binding class for activity_preferences.xml
+    private ActivityPreferencesBinding binding;
     private GoalAdapter goalAdapter;
     private List<Goal> goalsList;
     private FirebaseFirestore firestore;
@@ -54,43 +52,45 @@ public class PreferenceActivity extends AppCompatActivity {
             if (selectedGoals.isEmpty()) {
                 Toast.makeText(this, "Please select at least one goal!", Toast.LENGTH_SHORT).show();
             } else {
-                // Map combined goals to their individual components
                 List<String> mappedGoals = mapSelectedGoals(selectedGoals);
-
-                for (String goal : mappedGoals) {
-                    System.out.println("Mapped Goal: " + goal); // For debugging
-                }
-
                 savePreferences(mappedGoals, visionBoardId);
             }
         });
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.bottom_home) {
-                // Navigate to MainActivity
                 startActivity(new Intent(this, MainActivity.class));
                 return true;
             } else if (item.getItemId() == R.id.history_menu) {
-                // Navigate to HistoryActivity
                 startActivity(new Intent(this, HistoryActivity.class));
                 return true;
             } else {
                 return false;
             }
         });
-
-
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList("selectedGoals", new ArrayList<>(goalAdapter.getSelectedGoals()));
+    }
 
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        List<String> restoredSelectedGoals = savedInstanceState.getStringArrayList("selectedGoals");
+        if (restoredSelectedGoals != null) {
+            goalAdapter.setSelectedGoals(restoredSelectedGoals);
+        }
+    }
 
-    // Dummy goals data
     @NonNull
     private List<Goal> getGoals() {
         List<Goal> goals = new ArrayList<>();
         goals.add(new Goal(R.drawable.heath, "Health"));
         goals.add(new Goal(R.drawable.travel, "Travel"));
-        goals.add(new Goal(R.drawable.travel, "Education and Career")); // Single UI option
+        goals.add(new Goal(R.drawable.travel, "Education and Career"));
         goals.add(new Goal(R.drawable.heath, "Relationship"));
         return goals;
     }
@@ -108,13 +108,10 @@ public class PreferenceActivity extends AppCompatActivity {
         return mappedGoals;
     }
 
-    // Save the Vision Board to Firestore
     private void savePreferences(List<String> preferences, String visionBoardId) {
-        //String visionBoardId = UUID.randomUUID().toString();
-
         Map<String, Object> visionBoardData = new HashMap<>();
         visionBoardData.put("preferences", preferences);
-        visionBoardData.put("likedImages", new ArrayList<>()); // Initialize empty liked images
+        visionBoardData.put("likedImages", new ArrayList<>());
 
         firestore.collection("users")
                 .document(username)
@@ -124,7 +121,6 @@ public class PreferenceActivity extends AppCompatActivity {
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Vision Board saved successfully!", Toast.LENGTH_SHORT).show();
 
-                    // Navigate to SwipeActivity to handle liked images
                     Intent intent = new Intent(PreferenceActivity.this, SwipeActivity.class);
                     intent.putExtra("userId", username);
                     intent.putExtra("visionBoardId", visionBoardId);

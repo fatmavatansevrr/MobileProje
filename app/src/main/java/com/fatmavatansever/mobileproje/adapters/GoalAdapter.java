@@ -68,7 +68,18 @@ public class GoalAdapter extends RecyclerView.Adapter<GoalAdapter.GoalViewHolder
         return selectedGoals;
     }
 
-    static class GoalViewHolder extends RecyclerView.ViewHolder {
+    /**
+     * Sets the selected goals and refreshes the UI to reflect the current state.
+     *
+     * @param selectedGoals List of selected goals to be restored.
+     */
+    public void setSelectedGoals(List<String> selectedGoals) {
+        this.selectedGoals.clear();
+        this.selectedGoals.addAll(selectedGoals);
+        notifyDataSetChanged(); // Refresh the RecyclerView
+    }
+
+    public static class GoalViewHolder extends RecyclerView.ViewHolder {
         ImageView goalImage;
         TextView goalText;
 

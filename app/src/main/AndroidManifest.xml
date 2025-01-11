@@ -12,14 +12,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MobileProje"
         tools:targetApi="31">
-        <activity android:name=".SignInActivity"/>
+        <!-- SignInActivity -->
+        <activity android:name=".SignInActivity" />
+        <!-- PreferenceActivity -->
         <activity android:name=".PreferenceActivity" />
-        <activity android:name=".SwipeActivity" />
-        <activity android:name=".CollageActivity" />
-        <activity android:name=".WelcomeActivity"/>
-        <activity android:name=".HistoryActivity" />
+        <!-- SwipeActivity -->
+        <activity
+            android:name=".SwipeActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <!-- CollageActivity -->
+        <activity
+            android:name=".CollageActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <!-- WelcomeActivity -->
+        <activity android:name=".WelcomeActivity" />
+        <!-- HistoryActivity -->
+        <activity
+            android:name=".HistoryActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <!-- VisionBoardDetailActivity -->
         <activity android:name=".VisionBoardDetailActivity" />
 
+        <!-- MainActivity -->
         <activity android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -27,8 +41,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
 
     </application>
 

@@ -33,17 +33,33 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
         // Intent'ten görsel yolunu al
         String visionBoardPath = getIntent().getStringExtra("visionBoardPath");
 
-
-        if (visionBoardPath != null) {
-            Bitmap bitmap = BitmapFactory.decodeFile(visionBoardPath);
-            binding.visionboardDetailImage.setImageBitmap(bitmap);
-
-            // İndirme butonu tıklama olayı
-            binding.downloadButton.setOnClickListener(v -> saveImageToGallery(bitmap));
+        if (visionBoardPath == null || visionBoardPath.isEmpty()) {
+            Toast.makeText(this, "Invalid vision board path!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
         }
 
+        File file = new File(visionBoardPath);
+        if (!file.exists()) {
+            Toast.makeText(this, "Vision board file not found!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
+        Bitmap bitmap = BitmapFactory.decodeFile(visionBoardPath);
+        if (bitmap != null) {
+            binding.visionboardDetailImage.setImageBitmap(bitmap);
+        } else {
+            Toast.makeText(this, "Failed to load vision board!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
+        // İndirme butonu tıklama olayı
+        binding.downloadButton.setOnClickListener(v -> saveImageToGallery(bitmap));
+
+        // Silme butonu tıklama olayı
+        binding.deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog(file));
 
         // Bottom Navigation tıklama olaylarını ayarla
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -60,6 +76,7 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
             }
         });
     }
+
     private void saveImageToGallery(Bitmap bitmap) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Images.Media.TITLE, "VisionBoard");
@@ -80,5 +97,21 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
                 Toast.makeText(this, "Error saving image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void showDeleteConfirmationDialog(File file) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Vision Board")
+                .setMessage("Are you sure you want to delete this vision board?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    if (file.delete()) {
+                        Toast.makeText(this, "Vision board deleted!", Toast.LENGTH_SHORT).show();
+                        finish(); // Aktiviteyi kapat
+                    } else {
+                        Toast.makeText(this, "Failed to delete vision board!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 }
