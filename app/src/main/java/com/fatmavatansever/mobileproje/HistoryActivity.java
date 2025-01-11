@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -84,11 +86,32 @@ public class HistoryActivity extends AppCompatActivity {
         }
     }
 
-    private void onVisionBoardClick(VisionBoard visionBoard) {
+    public void onVisionBoardClick(VisionBoard visionBoard) {
         Intent intent = new Intent(this, VisionBoardDetailActivity.class);
         intent.putExtra("visionBoardPath", visionBoard.getCollageFile().getAbsolutePath());
-        startActivity(intent);
+        detailLauncher.launch(intent);
 
     }
+
+    private ActivityResultLauncher<Intent> detailLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    String deletedPath = result.getData().getStringExtra("deletedPath");
+                    if (deletedPath != null) {
+                        // Listeden silinen öğeyi kaldır
+                        for (int i = 0; i < visionBoardList.size(); i++) {
+                            if (visionBoardList.get(i).getCollageFile().getAbsolutePath().equals(deletedPath)) {
+                                visionBoardList.remove(i);
+                                adapter.notifyItemRemoved(i);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+    );
+
+
 
 }

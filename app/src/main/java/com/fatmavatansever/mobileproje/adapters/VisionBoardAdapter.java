@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.fatmavatansever.mobileproje.HistoryActivity;
 import com.fatmavatansever.mobileproje.R;
 import com.fatmavatansever.mobileproje.models.VisionBoard;
 
@@ -111,7 +112,11 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
         // Tıklama olayını ayarla
         holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(visionBoard));
 
-        // Silme butonu tıklama olayı
+        holder.itemView.setOnClickListener(v -> {
+            if (holder.itemView.getContext() instanceof HistoryActivity) {
+                ((HistoryActivity) holder.itemView.getContext()).onVisionBoardClick(visionBoard);
+            }
+        });
 
 
     }

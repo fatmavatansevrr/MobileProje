@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/visionboard_detail_image"
@@ -13,40 +13,36 @@
         android:contentDescription="@string/visionboard_detail_image"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView" />
 
+    <!-- Silme Butonu -->
+    <ImageButton
+        android:id="@+id/delete_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rounded_background"
+        android:contentDescription="@string/delete_image"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_delete"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <!-- İndirme Butonu -->
-
-    <!-- Bottom Navigation View -->
-
     <ImageButton
         android:id="@+id/download_button"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="16dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="32dp"
-        android:background="@android:color/transparent"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="56dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rounded_background"
         android:contentDescription="@string/download_image"
         android:scaleType="centerInside"
         android:src="@drawable/ic_download"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Silme Butonu -->
-    <ImageButton
-        android:id="@+id/delete_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_margin="16dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:background="@drawable/rounded_background"
-        android:padding="8dp"
-        android:src="@drawable/ic_delete"
-        android:contentDescription="@string/delete_image"
-        android:scaleType="centerInside" />
-
+    <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="0dp"
@@ -60,6 +56,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

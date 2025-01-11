@@ -32,7 +32,7 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
 
         // Intent'ten görsel yolunu al
         String visionBoardPath = getIntent().getStringExtra("visionBoardPath");
-
+        File visionBoardFile = new File(visionBoardPath);
 
         if (visionBoardPath != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(visionBoardPath);
@@ -41,6 +41,26 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
             // İndirme butonu tıklama olayı
             binding.downloadButton.setOnClickListener(v -> saveImageToGallery(bitmap));
         }
+
+        binding.deleteButton.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Are you sure you want to delete this?")
+                    .setMessage("You are about to delete this VisionBoard. This action cannot be undone.")
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        boolean deleted = visionBoardFile.delete();
+                        if (deleted) {
+                            Intent intent = new Intent();
+                            intent.putExtra("deletedPath", visionBoardPath);
+                            setResult(RESULT_OK, intent);
+                            finish(); // Sayfayı kapat
+                        } else {
+                            Toast.makeText(this, "Failed to delete VisionBoard!", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .show();
+        });
+
 
 
 
@@ -81,4 +101,7 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
             }
         }
     }
+
+
+
 }
