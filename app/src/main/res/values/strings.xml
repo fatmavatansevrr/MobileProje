@@ -22,4 +22,6 @@
     <string name="home">Home</string>
     <string name="download_image">Download Image</string>
     <string name="delete_image">Delete Image</string>
+    <string name="set_wallpaper">Set Wallpaper</string>
+
 </resources>
