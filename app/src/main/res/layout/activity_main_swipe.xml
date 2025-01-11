@@ -22,19 +22,19 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/instruction_text"
-        android:layout_above="@id/continue_button"
+        android:layout_above="@id/finishSaveButton"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp" />
 
     <!-- Finish Button -->
     <Button
-        android:id="@+id/continue_button"
+        android:id="@+id/finishSaveButton"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_margin="16dp"
         android:layout_above="@id/bottomNavigationView"
-        android:backgroundTint="#007AFF"
+        android:backgroundTint="#56A7F6"
         android:text="@string/finish_and_save"
         android:textColor="#FFFFFF"
         android:textSize="16sp"

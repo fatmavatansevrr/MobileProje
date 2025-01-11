@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.fatmavatansever.mobileproje.HistoryActivity;
 import com.fatmavatansever.mobileproje.R;
 import com.fatmavatansever.mobileproje.models.VisionBoard;
@@ -39,7 +40,7 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
         this.visionBoards = visionBoards;
         this.onItemClickListener = onItemClickListener;
     }
-    private void saveImageToGallery(Context context, Bitmap bitmap) {
+    /*private void saveImageToGallery(Context context, Bitmap bitmap) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Images.Media.TITLE, "VisionBoard");
         contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Downloaded from app");
@@ -59,7 +60,35 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
                 Toast.makeText(context, "Error saving image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
+    }*/
+    private void saveImageToGallery(Context context, String filePath) {
+        try {
+            // Bitmap'i dosya yolundan oluştur
+            Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MediaStore.Images.Media.TITLE, "VisionBoard");
+            contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Downloaded from app");
+            contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/VisionBoards");
+            }
+
+            Uri uri = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+
+            if (uri != null) {
+                try (OutputStream outputStream = context.getContentResolver().openOutputStream(uri)) {
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                    Toast.makeText(context, "Image saved to gallery!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Error saving image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
+
 
     private void deleteImage(Context context, int position) {
         VisionBoard visionBoard = visionBoards.get(position);
@@ -73,7 +102,6 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
                         visionBoards.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position, visionBoards.size());
-                        Toast.makeText(context, "VisionBoard deleted!", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(context, "Could not be deleted!", Toast.LENGTH_SHORT).show();
                     }
@@ -94,16 +122,22 @@ public class VisionBoardAdapter extends RecyclerView.Adapter<VisionBoardAdapter.
     public void onBindViewHolder(@NonNull VisionBoardViewHolder holder, int position) {
         VisionBoard visionBoard = visionBoards.get(position);
 
+        // Glide ile görseli yükle
+        Glide.with(holder.itemView.getContext())
+                .load(visionBoard.getCollageFile())
+                .override(200, 200) // İstenilen boyutta yükle
+                .into(holder.visionBoardImageView);
+        /*
         // Kolaj dosyasını bitmap olarak yükle
         Bitmap bitmap = BitmapFactory.decodeFile(visionBoard.getCollageFile().getAbsolutePath());
         holder.visionBoardImageView.setImageBitmap(bitmap);
-
+*/
 
 
 
         // İndirme butonuna tıklama
         holder.downloadButton.setOnClickListener(v -> {
-            saveImageToGallery(holder.itemView.getContext(), bitmap);
+            saveImageToGallery(holder.itemView.getContext(), visionBoard.getCollageFile().getAbsolutePath());
         });
 
         // Silme butonu

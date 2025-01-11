@@ -37,7 +37,6 @@ public class PreferenceActivity extends AppCompatActivity {
         String visionBoardId = getIntent().getStringExtra("visionBoardId");
 
         if (username == null || username.isEmpty()) {
-            Toast.makeText(this, "Error: User ID not found!", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -90,8 +89,8 @@ public class PreferenceActivity extends AppCompatActivity {
         List<Goal> goals = new ArrayList<>();
         goals.add(new Goal(R.drawable.heath, "Health"));
         goals.add(new Goal(R.drawable.travel, "Travel"));
-        goals.add(new Goal(R.drawable.travel, "Education and Career"));
-        goals.add(new Goal(R.drawable.heath, "Relationship"));
+        goals.add(new Goal(R.drawable.ed_and_carr, "Education and Career"));
+        goals.add(new Goal(R.drawable.relationship, "Relationship"));
         return goals;
     }
 
@@ -119,7 +118,7 @@ public class PreferenceActivity extends AppCompatActivity {
                 .document(visionBoardId)
                 .set(visionBoardData)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Vision Board saved successfully!", Toast.LENGTH_SHORT).show();
+
 
                     Intent intent = new Intent(PreferenceActivity.this, SwipeActivity.class);
                     intent.putExtra("userId", username);
@@ -129,7 +128,7 @@ public class PreferenceActivity extends AppCompatActivity {
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error saving Vision Board: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Vision Board could not saved: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 }

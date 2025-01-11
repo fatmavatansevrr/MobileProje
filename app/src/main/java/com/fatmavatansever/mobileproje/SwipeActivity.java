@@ -19,6 +19,7 @@ import com.fatmavatansever.mobileproje.databinding.ActivityMainSwipeBinding;
 import com.fatmavatansever.mobileproje.models.SwipeCard;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
+import com.yuyakaido.android.cardstackview.CardStackView;
 import com.yuyakaido.android.cardstackview.Direction;
 import com.yuyakaido.android.cardstackview.StackFrom;
 import com.yuyakaido.android.cardstackview.SwipeableMethod;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class SwipeActivity extends AppCompatActivity {
+
     private ActivityMainSwipeBinding binding;
     private CardStackLayoutManager cardStackLayoutManager;
     private SwipeCardAdapter swipeCardAdapter;
@@ -64,38 +66,10 @@ public class SwipeActivity extends AppCompatActivity {
         selectedCards = new ArrayList<>();
         allCards = new ArrayList<>();
 
-        cardStackLayoutManager = new CardStackLayoutManager(this, new CardStackListener());
-        cardStackLayoutManager.setStackFrom(StackFrom.Top);
-        cardStackLayoutManager.setVisibleCount(3);
-        cardStackLayoutManager.setTranslationInterval(8.0f);
-        cardStackLayoutManager.setScaleInterval(0.95f);
-        cardStackLayoutManager.setSwipeThreshold(0.3f);
-        cardStackLayoutManager.setMaxDegree(20.0f);
-        cardStackLayoutManager.setSwipeableMethod(SwipeableMethod.Manual);
-
-        binding.cardStackView.setLayoutManager(cardStackLayoutManager);
-
-        swipeCardAdapter = new SwipeCardAdapter(allCards);
-        binding.cardStackView.setAdapter(swipeCardAdapter);
+        setupCardStackManager();
 
         if (savedInstanceState != null) {
-            // Restore saved state
-            int restoredPosition = savedInstanceState.getInt("currentPosition", 0);
-            List<SwipeCard> restoredSelectedCards = savedInstanceState.getParcelableArrayList("selectedCards");
-            List<SwipeCard> restoredAllCards = savedInstanceState.getParcelableArrayList("allCards");
-
-            if (restoredSelectedCards != null) {
-                selectedCards.clear();
-                selectedCards.addAll(restoredSelectedCards);
-            }
-
-            if (restoredAllCards != null) {
-                allCards.clear();
-                allCards.addAll(restoredAllCards);
-                swipeCardAdapter.notifyDataSetChanged();
-            }
-
-            cardStackLayoutManager.scrollToPosition(restoredPosition);
+            restoreInstanceState(savedInstanceState);
         } else {
             if (selectedTags != null && !selectedTags.isEmpty()) {
                 fetchImagesForTags(selectedTags);
@@ -104,6 +78,14 @@ public class SwipeActivity extends AppCompatActivity {
                 Toast.makeText(this, "No tags selected.", Toast.LENGTH_SHORT).show();
             }
         }
+
+        binding.finishSaveButton.setOnClickListener(v -> {
+            if (!selectedCards.isEmpty()) {
+                navigateToCollageActivity();
+            } else {
+                Toast.makeText(this, "You must like at least one card before finishing.", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.bottom_home) {
@@ -118,17 +100,47 @@ public class SwipeActivity extends AppCompatActivity {
         });
     }
 
+    private void setupCardStackManager() {
+        cardStackLayoutManager = new CardStackLayoutManager(this, new CardStackListener());
+        cardStackLayoutManager.setStackFrom(StackFrom.Top);
+        cardStackLayoutManager.setVisibleCount(3);
+        cardStackLayoutManager.setTranslationInterval(8.0f);
+        cardStackLayoutManager.setScaleInterval(0.95f);
+        cardStackLayoutManager.setSwipeThreshold(0.3f);
+        cardStackLayoutManager.setMaxDegree(20.0f);
+        cardStackLayoutManager.setSwipeableMethod(SwipeableMethod.Manual);
+
+        binding.cardStackView.setLayoutManager(cardStackLayoutManager);
+
+        swipeCardAdapter = new SwipeCardAdapter(allCards);
+        binding.cardStackView.setAdapter(swipeCardAdapter);
+    }
+
+    private void restoreInstanceState(Bundle savedInstanceState) {
+        int restoredPosition = savedInstanceState.getInt("currentPosition", 0);
+        List<SwipeCard> restoredSelectedCards = savedInstanceState.getParcelableArrayList("selectedCards");
+        List<SwipeCard> restoredAllCards = savedInstanceState.getParcelableArrayList("allCards");
+
+        if (restoredSelectedCards != null) {
+            selectedCards.clear();
+            selectedCards.addAll(restoredSelectedCards);
+        }
+
+        if (restoredAllCards != null) {
+            allCards.clear();
+            allCards.addAll(restoredAllCards);
+            swipeCardAdapter.notifyDataSetChanged();
+        }
+
+        cardStackLayoutManager.scrollToPosition(restoredPosition);
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        // Save current position
         outState.putInt("currentPosition", cardStackLayoutManager.getTopPosition());
-
-        // Save selected cards
         outState.putParcelableArrayList("selectedCards", new ArrayList<>(selectedCards));
-
-        // Save all loaded cards
         outState.putParcelableArrayList("allCards", new ArrayList<>(allCards));
     }
 
@@ -152,12 +164,12 @@ public class SwipeActivity extends AppCompatActivity {
                 selectedCards.add(likedCard);
 
                 if (selectedCards.size() >= MAX_LIKED_CARDS) {
-                    saveLikedImagesToFirestore();
-                    Intent intent = new Intent(SwipeActivity.this, CollageActivity.class);
-                    intent.putExtra("selectedCards", new ArrayList<>(selectedCards));
-                    startActivity(intent);
-                    finish();
+                    navigateToCollageActivity();
                 }
+            }
+
+            if (cardStackLayoutManager.getTopPosition() == allCards.size()) {
+                navigateToCollageActivity();
             }
         }
 
@@ -175,6 +187,14 @@ public class SwipeActivity extends AppCompatActivity {
 
         @Override
         public void onCardDisappeared(View view, int position) {}
+    }
+
+    private void navigateToCollageActivity() {
+        saveLikedImagesToFirestore();
+        Intent intent = new Intent(SwipeActivity.this, CollageActivity.class);
+        intent.putExtra("selectedCards", new ArrayList<>(selectedCards));
+        startActivity(intent);
+        finish();
     }
 
     private void saveLikedImagesToFirestore() {

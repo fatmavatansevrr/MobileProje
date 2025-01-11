@@ -24,7 +24,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/save_to_library"
-        android:backgroundTint="#007AFF"
+        android:backgroundTint="#56A7F6"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:fontFamily="sans-serif-medium"

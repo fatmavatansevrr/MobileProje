@@ -3,6 +3,7 @@ package com.fatmavatansever.mobileproje;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Build;
@@ -35,23 +36,24 @@ public class CollageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // ViewBinding ile layout'u bağla
         binding = ActivityCollageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         if (savedInstanceState != null) {
-            // Restore saved state
+            // Durumu geri yükle
             selectedCards = (List<SwipeCard>) savedInstanceState.getSerializable("selectedCards");
             collageBitmap = savedInstanceState.getParcelable("collageBitmap");
 
-            // Display restored collage
+            // Kolaj görüntüsünü geri yükle
             if (collageBitmap != null) {
                 binding.collageImageView.setImageBitmap(collageBitmap);
             }
         } else {
-            // Get the selected cards passed from SwipeActivity
+            // SwipeActivity'den seçilen kartları al
             selectedCards = (List<SwipeCard>) getIntent().getSerializableExtra("selectedCards");
 
-            // Load images into Bitmap list
+            // Bitmap listesine görüntüleri yükle
             for (SwipeCard card : selectedCards) {
                 Glide.with(this)
                         .asBitmap()
@@ -72,7 +74,7 @@ public class CollageActivity extends AppCompatActivity {
             }
         }
 
-        // Set up Save to Gallery button listener
+        // Save to Library butonunu ayarla
         binding.saveToLibraryButton.setOnClickListener(v -> {
             if (collageBitmap != null) {
                 saveImageToGallery(collageBitmap);
@@ -81,13 +83,14 @@ public class CollageActivity extends AppCompatActivity {
             }
         });
 
+        // BottomNavigationView için dinleyici ekle
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.bottom_home) {
-                // Navigate to MainActivity
+                // MainActivity'e git
                 startActivity(new Intent(this, MainActivity.class));
                 return true;
             } else if (item.getItemId() == R.id.history_menu) {
-                // Navigate to HistoryActivity
+                // HistoryActivity'e git
                 startActivity(new Intent(this, HistoryActivity.class));
                 return true;
             } else {
@@ -96,24 +99,35 @@ public class CollageActivity extends AppCompatActivity {
         });
     }
 
+    /*@Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Seçilen kartları ve kolaj bitmap'ini kaydet
+        outState.putSerializable("selectedCards", new ArrayList<>(selectedCards));
+        outState.putParcelable("collageBitmap", collageBitmap);
+    }*/
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        // Save selected cards
+        File createdImagesFolder = new File(getFilesDir(), "createdImages");
+        File collageFile = new File(createdImagesFolder, "collage_temp.png");
+        if (collageFile.exists()) {
+            outState.putString("collagePath", collageFile.getAbsolutePath());
+        }
         outState.putSerializable("selectedCards", new ArrayList<>(selectedCards));
-
-        // Save the generated collage bitmap
-        outState.putParcelable("collageBitmap", collageBitmap);
     }
 
+
     private void createCollage() {
-        int width = 300;  // Each image width
-        int height = 300; // Each image height
-        int columns = 3;  // Number of columns in the collage
+        int width = 300;  // Her bir görüntünün genişliği
+        int height = 300; // Her bir görüntünün yüksekliği
+        int columns = 3;  // Kolajdaki sütun sayısı
         int rows = (int) Math.ceil((double) imageBitmaps.size() / columns);
 
-        // Create a blank bitmap for the collage
+        // Kolaj için boş bir bitmap oluştur
         collageBitmap = Bitmap.createBitmap(columns * width, rows * height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(collageBitmap);
 
@@ -125,34 +139,46 @@ public class CollageActivity extends AppCompatActivity {
             canvas.drawBitmap(scaledImage, col * width, row * height, null);
         }
 
-        // Display collage in ImageView
+        // Kolajı ImageView'da göster
         binding.collageImageView.setImageBitmap(collageBitmap);
 
+        // Kolajı dahili dizine kaydet
         saveImageToCreatedImages(collageBitmap);
     }
 
     private void saveImageToCreatedImages(Bitmap bitmap) {
         try {
-            // Create 'createdImages' folder in the app's internal storage
+            // Dahili depolama içinde 'createdImages' klasörünü oluştur
             File createdImagesFolder = new File(getFilesDir(), "createdImages");
             if (!createdImagesFolder.exists()) {
                 createdImagesFolder.mkdirs();
             }
 
-            // Create a unique file for the collage
+            // Kolaj için benzersiz bir dosya oluştur
             File collageFile = new File(createdImagesFolder, "collage_" + System.currentTimeMillis() + ".png");
 
-            // Write the bitmap to the file
+            // Bitmap'i dosyaya yaz
             FileOutputStream fos = new FileOutputStream(collageFile);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
 
-            Toast.makeText(this, "Collage saved to 'createdImages' folder!", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "Error saving collage: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        String collagePath = savedInstanceState.getString("collagePath");
+        if (collagePath != null) {
+            collageBitmap = BitmapFactory.decodeFile(collagePath);
+            binding.collageImageView.setImageBitmap(collageBitmap);
+        }
+    }
+
 
     private void saveImageToGallery(Bitmap bitmap) {
         ContentValues contentValues = new ContentValues();

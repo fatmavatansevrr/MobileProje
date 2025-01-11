@@ -118,7 +118,7 @@ public class HistoryActivity extends AppCompatActivity {
         }
     }
 
-    private void onVisionBoardClick(VisionBoard visionBoard) {
+    public void onVisionBoardClick(VisionBoard visionBoard) {
         if (visionBoard == null || visionBoard.getCollageFile() == null) {
             Log.e(TAG, "Invalid vision board or file is null.");
             Toast.makeText(this, "Invalid vision board!", Toast.LENGTH_SHORT).show();
@@ -132,7 +132,7 @@ public class HistoryActivity extends AppCompatActivity {
             return;
         }
         Intent intent = new Intent(this, VisionBoardDetailActivity.class);
-        intent.putExtra("visionBoardPath", visionBoard.getCollageFile().getAbsolutePath());
+        intent.putExtra("visionBoardPath", file.getAbsolutePath());
         startActivity(intent);
         detailLauncher.launch(intent);
 

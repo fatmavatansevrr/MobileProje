@@ -78,17 +78,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Settings Button -->
-        <Button
-            android:id="@+id/settings_button"
-            android:layout_width="300dp"
-            android:layout_height="50dp"
-            android:text="Settings"
-            android:backgroundTint="#56A7F6"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@id/history_button"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

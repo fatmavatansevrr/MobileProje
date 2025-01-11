@@ -51,10 +51,6 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
             startActivity(intent);
         });
-
-        binding.settingsButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Settings feature not implemented yet", Toast.LENGTH_SHORT).show();
-        });
     }
 
     private String getOrCreateUserId() {
