@@ -37,65 +37,67 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
         String visionBoardPath = getIntent().getStringExtra("visionBoardPath");
         File visionBoardFile = new File(visionBoardPath);
 
+        // Görsel yolu geçersizse hata mesajı göster ve aktiviteyi bitir
         if (visionBoardPath == null || visionBoardPath.isEmpty()) {
-            Toast.makeText(this, "Invalid vision board path!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Geçersiz görsel yolu!", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        // Görsel dosyası bulunamazsa hata mesajı göster
         if (!visionBoardFile.exists()) {
-            Toast.makeText(this, "Vision board file not found!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Görsel dosyası bulunamadı!", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        // Görseli yükle ve ImageView'de göster
         Bitmap bitmap = BitmapFactory.decodeFile(visionBoardPath);
         if (bitmap != null) {
             binding.visionboardDetailImage.setImageBitmap(bitmap);
 
-            // İndirme butonu tıklama olayı
+            // İndirme butonuna tıklama olayı
             binding.downloadButton.setOnClickListener(v -> saveImageToGallery(bitmap));
-            // Buton referansı
+            // Duvar kağıdı butonuna tıklama olayı
             ImageButton wallpaperButton = findViewById(R.id.set_wallpaper_button);
             wallpaperButton.setOnClickListener(v -> setVisionBoardAsWallpaper(bitmap));
-        }else {
-            Toast.makeText(this, "Failed to load vision board!", Toast.LENGTH_SHORT).show();
+        } else {
+            // Görsel yüklenemezse hata mesajı göster
+            Toast.makeText(this, "Görsel yüklenemedi!", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-
+        // Silme butonuna tıklama olayı
         binding.deleteButton.setOnClickListener(v -> {
             new AlertDialog.Builder(this)
-                    .setTitle("Are you sure you want to delete this?")
-                    .setMessage("You are about to delete this VisionBoard. This action cannot be undone.")
-                    .setPositiveButton("Delete", (dialog, which) -> {
+                    .setTitle("Emin misiniz? Silmek istiyor musunuz?")
+                    .setMessage("Bu VisionBoard'u silmek üzeresiniz. Bu işlem geri alınamaz.")
+                    .setPositiveButton("Sil", (dialog, which) -> {
                         boolean deleted = visionBoardFile.delete();
                         if (deleted) {
+                            // Silme işlemi başarılıysa, sonrasında gelen Intent ile yolu geri gönder
                             Intent intent = new Intent();
                             intent.putExtra("deletedPath", visionBoardPath);
                             setResult(RESULT_OK, intent);
                             finish(); // Sayfayı kapat
                         } else {
-                            Toast.makeText(this, "Failed to delete VisionBoard!", Toast.LENGTH_SHORT).show();
+                            // Silme başarısızsa hata mesajı göster
+                            Toast.makeText(this, "VisionBoard silinemedi!", Toast.LENGTH_SHORT).show();
                         }
                     })
-                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .setNegativeButton("İptal", (dialog, which) -> dialog.dismiss())
                     .show();
         });
-
-
-
-
 
         // Bottom Navigation tıklama olaylarını ayarla
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.bottom_home) {
-                // MainActivity'e git
+                // Ana sayfaya git
                 startActivity(new Intent(this, MainActivity.class));
                 return true;
             } else if (item.getItemId() == R.id.history_menu) {
-                // HistoryActivity'e git
+                // Geçmiş sayfasına git
                 startActivity(new Intent(this, HistoryActivity.class));
                 return true;
             } else {
@@ -103,28 +105,34 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+    // Görseli galeriyeye kaydetme fonksiyonu
     private void saveImageToGallery(Bitmap bitmap) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Images.Media.TITLE, "VisionBoard");
-        contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Downloaded from app");
+        contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Uygulamadan indirildi");
         contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/VisionBoards");
         }
 
+        // Galeriye kaydetmek için URI oluştur
         Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
 
         if (uri != null) {
             try (OutputStream outputStream = getContentResolver().openOutputStream(uri)) {
+                // Görseli PNG formatında kaydet
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                Toast.makeText(this, "Image saved to gallery!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Görsel galeriye kaydedildi!", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
-                Toast.makeText(this, "Error saving image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                // Hata oluşursa mesaj göster
+                Toast.makeText(this, "Görsel kaydedilirken hata oluştu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
 
+    // Bitmap'i geçici dosyaya kaydedip URI döndürme fonksiyonu
     private Uri saveBitmapToCacheAndGetUri(Context context, Bitmap bitmap) {
         try {
             // Geçici bir dosya oluştur
@@ -144,7 +152,7 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
         }
     }
 
-
+    // Görseli duvar kağıdı olarak ayarlama fonksiyonu
     private void setVisionBoardAsWallpaper(Bitmap bitmap) {
         try {
             // Görseli geçici bir dosyaya kaydet
@@ -159,17 +167,14 @@ public class VisionBoardDetailActivity extends AppCompatActivity {
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                 // Kullanıcıya seçim ekranı göster
-                startActivity(Intent.createChooser(intent, "Set as Wallpaper"));
+                startActivity(Intent.createChooser(intent, "Duvar Kağıdı Olarak Ayarla"));
             } else {
-                Toast.makeText(this, "Error creating wallpaper file!", Toast.LENGTH_SHORT).show();
+                // URI oluşturulamazsa hata mesajı göster
+                Toast.makeText(this, "Duvar kağıdı dosyası oluşturulurken hata oluştu!", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Failed to set wallpaper!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Duvar kağıdı ayarlanırken hata oluştu!", Toast.LENGTH_SHORT).show();
         }
     }
-
-
-
-
 }
