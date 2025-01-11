@@ -49,11 +49,13 @@
         android:layout_height="40dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
+        android:padding="6dp"
         android:background="@drawable/rounded_background"
         android:contentDescription="@string/set_wallpaper"
         android:src="@drawable/ic_wallpaper"
         app:layout_constraintEnd_toStartOf="@id/download_button"
         android:scaleType="centerInside"
+
         app:layout_constraintTop_toTopOf="parent" />
 
 
